@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/auth-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve auth-service"
+  },
+  "nx": {
+    "name": "auth-service",
+    "projectType": "application",
+    "sourceRoot": "apps/auth-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/auth-service",
+          "main": "apps/auth-service/src/main.ts",
+          "tsConfig": "apps/auth-service/tsconfig.app.json",
+          "webpackConfig": "apps/auth-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/auth-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "auth-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "auth-service:build:development"
+          },
+          "production": {
+            "buildTarget": "auth-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}
