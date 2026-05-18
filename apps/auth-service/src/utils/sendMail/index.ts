@@ -6,14 +6,16 @@ import path from "path"
 dotenv.config()
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: process.env.SMTP_HOST!,
     port: Number(process.env.SMTP_PORT) || 587,
-    service: process.env.SMTP_SERVICE,
+    // service: process.env.SMTP_SERVICE,
+     secure: Number(process.env.SMTP_PORT) === 465,
+    family: 4,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     }
-})
+}as nodemailer.TransportOptions)
 
 // Render an EJS email template
 const renderEmailTemplate = async(templateName:string,data: Record<string, any>): Promise<string> => {

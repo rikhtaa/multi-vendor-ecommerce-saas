@@ -1,8 +1,9 @@
 import React from 'react'
-import Login from './(routes)/login/page'
 
 const page = () => {
-  return <Login/>
+  return <div>
+
+  </div>
 }
 
 export default page

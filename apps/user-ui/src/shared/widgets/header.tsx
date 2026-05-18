@@ -1,9 +1,13 @@
+"use client"
 import Link from "next/link";
 import React from "react";
-import { HeartIcon, Search, UserRound, ShoppingCart, ShoppingBag } from "lucide-react"
+import { HeartIcon, Search, UserRound, ShoppingCart } from "lucide-react"
 import HeaderBottom from "../../assets/svgs/header-bottom";
+import useUser from "../../hooks/useUser";
 
 const Header = () => {
+  const { user, isLoading } = useUser()
+
   return (
    <div className="w-full bg-white">
      <div className="w-[80%] py-5 m-auto flex items-center justify-between">
@@ -28,15 +32,29 @@ const Header = () => {
     {/* Profile - now inside the container */}
     <div className="flex items-center gap-8">
       <div className="flex items-center gap-2">
-        <Link href={"/login"}
+       {!isLoading && user ? (
+          <>
+        <Link href={"/profile"}>
+            <UserRound/>
+        </Link>
+        <Link href={"/login"}>
+          <span className="block font-medium">Hello</span>
+          <span className="font-semibold">{user?.name}</span>
+        </Link>
+          </>
+       ) : (
+        <>
+          <Link href={"/login"}
           className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
         >
           <UserRound/>
         </Link>
         <Link href={"/login"}>
-          <span className="block font-medium">Hello</span>
-          <span className="font-semibold">Sign In</span>
+          <span className="block font-medium">Hello,</span>
+          <span className="font-semibold">{isLoading ? "..." : "Sign In"}</span>
         </Link>
+        </>
+       )}
       </div>
       <div className="flex items-center gap-5">
          <Link href={"/wishlist"} className="relative">

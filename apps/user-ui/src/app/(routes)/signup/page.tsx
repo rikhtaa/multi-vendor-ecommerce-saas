@@ -11,6 +11,7 @@ import axios, { AxiosError } from "axios"
 
 type FormData = {
     name: string
+    email: string
     password: string
 }
 
@@ -19,7 +20,7 @@ const signup = () => {
     const [showOtp, setShowOtp] = useState(false)
     const [canResend, setCanResend] = useState(true)
     const [timer, setTimer] = useState(60)
-    const [otp, setOtp] = useState(["","","",""])
+    const [otp, setOtp] = useState(["", "", "", ""])
     const [userData, setUserData] = useState<FormData | null>(null)
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
     const router = useRouter()
@@ -67,7 +68,7 @@ const signup = () => {
             `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-user`,
             {
               ...userData,
-
+              otp: otp.join("") 
             }
         )
         return response.data
@@ -99,8 +100,11 @@ const signup = () => {
     }
 
     const resendOtp = () => {
-
+        if(userData){
+            signupMutation.mutate(userData)
+        }
     }
+
     return (
         <div className='w-full py-10 min-h-[85vh] bg-[#f1f1f1]'>
             <h1 className="text-4xl font-poppins font-semibold text-black text-center">
@@ -143,6 +147,26 @@ const signup = () => {
                                 {String(errors.name.message)}
                             </p>
                         )}
+
+                         <label className="block text-gray-700 mb-1">Email</label>
+                        <input
+                            type="email"
+                            placeholder="abc@mail.com"
+                            className="w-full p-2 border border-gray-300 outline-none !rounded mb-1"
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                                    message: "Invalid email address"
+                                },
+                            })}
+                        />
+                        {errors.email && (
+                            <p className="text-red-500 text-sm">
+                                {String(errors.email.message)}
+                            </p>
+                        )}
+
                         <label className="block text-gray-700 mb-1">Password</label>
                         <div className="relative">
                             <input
@@ -177,9 +201,6 @@ const signup = () => {
                         >
                             {signupMutation.isPending ? "Signing up..." : "Signup"}
                         </button>
-                        {serverError && (
-                            <p className="text-red-500 text-sm mt-2">{serverError}</p>
-                        )}
                     </form>
                     ): (
                       <div>
@@ -208,7 +229,6 @@ const signup = () => {
                         >
                             {verifyOtpMutation.isPending ? "Verifying..." : "Verify OTP"}
                         </button>
-                        <p className="text-center text-sm mt-4">
                             {canResend ? (
                                 <button
                                  onClick={resendOtp}
@@ -219,7 +239,6 @@ const signup = () => {
                             ) : (
                               `Resend OTP in ${timer}s`
                             )}
-                        </p>
                         {verifyOtpMutation.isError && 
                           verifyOtpMutation.error instanceof AxiosError && (
                             <p className='text-red-500 text-sm mt-2'>

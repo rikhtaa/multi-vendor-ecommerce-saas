@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/user-ui"
+    },
+    {
+      "path": "./apps/seller-ui"
     }
   ]
 }
