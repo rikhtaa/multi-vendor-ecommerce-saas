@@ -28,7 +28,7 @@ const CustomProperties = ({ control, errors }: any) => {
                         }
 
                         const addValue = (index: number) => {
-                            if (!addValue.trim()) return
+                            if (!newValue.trim()) return
                             const updatedProperties = [...properties]
                             updatedProperties[index].values.push(newValue)
                             setProperties(updatedProperties)
@@ -68,7 +68,7 @@ const CustomProperties = ({ control, errors }: any) => {
                                             <div className="flex items-center mt-2 gap-2">
                                                 <input
                                                     type="text"
-                                                    className='boder outline-none border-gray-700 p-2 rounded-md text-white w-full'
+                                                    className='boder outline-none border-gray-700 p-2 rounded-md text-white w-full bg-gray-800'
                                                     placeholder='Enter value...'
                                                     value={newValue}
                                                     onChange={(e) => setNewValue(e.target.value)}
