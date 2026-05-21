@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/product-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve product-service"
+  },
+  "nx": {
+    "name": "product-service",
+    "projectType": "application",
+    "sourceRoot": "apps/product-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/product-service",
+          "main": "apps/product-service/src/main.ts",
+          "tsConfig": "apps/product-service/tsconfig.app.json",
+          "webpackConfig": "apps/product-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/product-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "product-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "product-service:build:development"
+          },
+          "production": {
+            "buildTarget": "product-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}

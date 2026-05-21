@@ -369,7 +369,6 @@ export const createStripeConnectLink = async (
 ) => {
   try {
     const { sellerId } = req.body
-    console.log("sellerId in state:", sellerId)
 
     if (!sellerId) {
       return next(new validationError("Seller ID are required!"))

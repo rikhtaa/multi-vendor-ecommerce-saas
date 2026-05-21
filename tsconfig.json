@@ -14,6 +14,9 @@
     },
     {
       "path": "./apps/seller-ui"
+    },
+    {
+      "path": "./apps/product-service"
     }
   ]
 }
