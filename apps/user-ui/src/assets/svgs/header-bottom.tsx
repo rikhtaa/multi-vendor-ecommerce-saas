@@ -5,11 +5,15 @@ import { NavItemsTypes } from '../../configs/global'
 import { navItems } from '../../configs/constants'
 import Link from 'next/link'
 import useUser from '../../hooks/useUser'
+import { useStore } from '../../shared/store'
 
 const HeaderBottom = () => {
     const [show, setShow] = useState(false)
     const [isSticky, setIsSticky] = useState(false)
     const { user, isLoading } = useUser()
+    const wishlist = useStore((state: any) => state.wishlist)
+    const cart = useStore((state: any) => state.cart)
+
 
     // Track scroll position
     useEffect(() => {
@@ -94,7 +98,7 @@ const HeaderBottom = () => {
                                     <HeartIcon />
                                     <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                                         <span className="text-white font-medium text-sm">
-                                            0
+                                            {wishlist?.length}
                                         </span>
                                     </div>
                                 </Link>
@@ -102,7 +106,7 @@ const HeaderBottom = () => {
                                     <ShoppingCart />
                                     <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                                         <span className="text-white font-medium text-sm">
-                                            9+
+                                            {cart?.length}
                                         </span>
                                     </div>
                                 </Link>

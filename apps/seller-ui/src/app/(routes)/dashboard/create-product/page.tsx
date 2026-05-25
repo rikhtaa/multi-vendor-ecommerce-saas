@@ -68,7 +68,7 @@ const Page = () => {
 
 
     const onSubmit = async (data: any) => {
-         setLoading(true)
+        setLoading(true)
         try {
             await axiosInstance.post("/product/api/create-product", data)
             router.push("/dashboard/all-products")
@@ -460,12 +460,11 @@ const Page = () => {
                                     rules={{
                                         required: "Detailed description is required",
                                         validate: (value) => {
-                                            const wordCount = value
-                                                ?.split(/\s+/)
-                                                .filter((word: string) => word).length
+                                            const text = value?.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ")
+                                            const wordCount = text?.trim().split(/\s+/).filter((word: string) => word).length
                                             return (
                                                 wordCount >= 100 ||
-                                                "Description must be ar least 100 words!"
+                                                "Description must be at least 100 words!"
                                             )
                                         }
                                     }}

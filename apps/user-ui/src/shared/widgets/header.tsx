@@ -4,9 +4,13 @@ import React from "react";
 import { HeartIcon, Search, UserRound, ShoppingCart } from "lucide-react"
 import HeaderBottom from "../../assets/svgs/header-bottom";
 import useUser from "../../hooks/useUser";
+import { useStore } from "../store";
 
 const Header = () => {
   const { user, isLoading } = useUser()
+  const wishlist = useStore((state: any) => state.wishlist)
+  const cart = useStore((state: any) => state.cart)
+ 
 
   return (
    <div className="w-full bg-white">
@@ -61,7 +65,7 @@ const Header = () => {
            <HeartIcon/>
            <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
              <span className="text-white font-medium text-sm">
-                0
+                {wishlist?.length}
              </span>
            </div>
          </Link>
@@ -69,7 +73,7 @@ const Header = () => {
            <ShoppingCart/>
            <div className="w-6 h-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
              <span className="text-white font-medium text-sm">
-                9+
+                {cart?.length}
              </span>
            </div>
          </Link>

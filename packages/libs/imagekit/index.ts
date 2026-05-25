@@ -6,3 +6,4 @@ export const imagekit = new ImageKit({
     urlEndpoint: "https://ik.imagekit.io/rikhtamenahil/"
 
 })
+

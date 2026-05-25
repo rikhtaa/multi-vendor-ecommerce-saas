@@ -24,3 +24,4 @@ export const errorMiddleware = (
         error: "Something went wrong, please try again!"
     })
 }
+
