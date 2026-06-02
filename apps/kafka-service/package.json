@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/kafka-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve kafka-service"
+  },
+  "nx": {
+    "name": "kafka-service",
+    "projectType": "application",
+    "sourceRoot": "apps/kafka-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/kafka-service",
+          "main": "apps/kafka-service/src/main.ts",
+          "tsConfig": "apps/kafka-service/tsconfig.app.json",
+          "webpackConfig": "apps/kafka-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/kafka-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "kafka-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "kafka-service:build:development"
+          },
+          "production": {
+            "buildTarget": "kafka-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}
