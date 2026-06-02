@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { shopCategories } from 'apps/seller-ui/src/app/utils/categories'
+import { shopCategories } from 'apps/seller-ui/src/utils/categories'
 import StripeLogo from 'apps/seller-ui/src/assets/svgs/stripe-logo'
 import axios from 'axios'
 import React from 'react'
