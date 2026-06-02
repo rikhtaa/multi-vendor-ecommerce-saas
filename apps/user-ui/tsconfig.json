@@ -28,7 +28,7 @@
       ]
     },
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "../../",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
@@ -36,9 +36,11 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/**/*.jsx",
+    "../../packages/**/*.ts",
     "../../apps/user-ui/.next/types/**/*.ts",
     "../../dist/apps/user-ui/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    "react-image-magnify.d.ts" 
   ],
   "exclude": [
     "out-tsc",

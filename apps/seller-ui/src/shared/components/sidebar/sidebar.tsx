@@ -8,7 +8,7 @@ import Box from '../box'
 import Link from 'next/link'
 import Logo from 'apps/seller-ui/src/assets/svgs/logo'
 import SidebarItem from './sidebar.item'
-import { BellPlus, BellRing, CalendarPlus, Headset, Home, ListOrdered, LogOut, Mail, PackageSearch, Settings, TicketPercent } from 'lucide-react'
+import { BellPlus, BellRing, CalendarPlus, Home, ListOrdered, LogOut, Mail, PackageSearch, Settings, TicketPercent } from 'lucide-react'
 import SidebarMenu from './sidebar.menu'
 
 const SidebarBarWrapper = () => {

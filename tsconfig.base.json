@@ -19,6 +19,7 @@
     "target": "es2022",
     "paths": {
       "@packages/*": ["packages/*"],
+      "packages/*": ["packages/*"]
     }
   }
 }

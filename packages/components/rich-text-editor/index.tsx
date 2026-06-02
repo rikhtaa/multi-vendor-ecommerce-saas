@@ -1,4 +1,6 @@
+"use client"
 import React, { useEffect, useRef, useState } from "react";
+// @ts-ignore
 import "react-quill-new/dist/quill.snow.css";
 import ReactQuill from "react-quill-new";
 

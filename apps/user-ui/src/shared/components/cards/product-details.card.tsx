@@ -79,13 +79,13 @@ const ProductDetailsCard = ({
             <div className="border-b relative pb-3 border-gray-200 flex items-center justify-between">
               <div className="flex items-start gap-3">
                 {/* Shop Logo */}
-                {/* <Image
+                <Image
                   src={data?.shop?.avatar}
                   alt="Shop Logo"
                   width={60}
                   height={60}
                   className='rounded-full w-[60px] h-[60px] object-cover'
-                /> */}
+                />
                 <div>
                   <Link
                     href={`/shop/${data?.Shop?.id}`}

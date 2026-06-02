@@ -41,7 +41,8 @@ const CartPage = () => {
     }
 
     const subtotal = cart.reduce(
-        (total: number, item: any) => total + item.quantity * item.sale_price
+        (total: number, item: any) => total + item.quantity * item.sale_price,
+        0
     )
 
     return (

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import axios, { AxiosError } from "axios"
-import { countries } from '../../utils/countires'
+import { countries } from '../../../utils/countires'
 import CreateShop from 'apps/seller-ui/src/shared/modules/auth/create-shop'
 
 
