@@ -1,5 +1,6 @@
-import { MapPin, Star } from 'lucide-react'
+import { ArrowUpRight, MapPin, Star } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 
 interface ShopCardProps {
@@ -72,13 +73,24 @@ const ShopCard: React.FC<ShopCardProps> = ({ shop }) => {
 
 
         {/* Category */}
-        {shop?.category && (
+      {shop?.category && (
           <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
             <span className="bg-blue-50 capitalize text-blue-600 px-2 py-0.5 rounded-full font-medium">
               {shop.category}
             </span>
           </div>
         )}
+
+        {/* Visit Button */}
+        <div className="mt-4">
+          <Link
+           href={`/shop/${shop.id}`}
+           className="inline-flex items-center text-sm text-blue-600 font-medium hover:underline hover:text-blue-700 transition"
+          >
+            Visit Shop
+            <ArrowUpRight className="w-4 h-4 ml-1"/>
+          </Link>
+        </div>
       </div>
     </div>
   )

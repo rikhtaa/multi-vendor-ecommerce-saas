@@ -38,10 +38,10 @@ const Header = () => {
       <div className="flex items-center gap-2">
        {!isLoading && user ? (
           <>
-        <Link href={"/profile"}>
+        <Link href={"/"}>
             <UserRound/>
         </Link>
-        <Link href={"/login"}>
+        <Link href={"/profile"}>
           <span className="block font-medium">Hello</span>
           <span className="font-semibold">{user?.name}</span>
         </Link>

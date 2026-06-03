@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { checkOtpRegstrictions, handleForgetPassword, sendOtp, trackOtpRequests, validateRegistrationData, verifyForgetPasswordOtp, verifyOtp } from "../utils/auth.helper";
-import { AuthError, validationError } from "@packages/error-handler";
+import { AuthError, NotFoundError, validationError } from "@packages/error-handler";
 import prisma from "@packages/libs/prisma";
 import bcrypt from "bcryptjs"
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
@@ -91,8 +91,8 @@ export const loginUser = async (
       return next(new AuthError("Invalid email or password"))
     }
 
-      res.clearCookie("access_token")
-      res.clearCookie("refresh_token")
+    res.clearCookie("access_token")
+    res.clearCookie("refresh_token")
 
 
     //Generate access and refresh token
@@ -131,10 +131,10 @@ export const refreshToken = async (
   res: Response,
   next: NextFunction) => {
   try {
-      const refreshToken =
-        req.cookies["refresh_token"]  ||
-        req.cookies["seler-refresh_token"]  || 
-        req.headers.authorization?.split(" ")[1]
+    const refreshToken =
+      req.cookies["refresh_token"] ||
+      req.cookies["seler-refresh_token"] ||
+      req.headers.authorization?.split(" ")[1]
 
     if (!refreshToken) {
       return next(new validationError("Unauthorized! No refresh token."))
@@ -150,13 +150,13 @@ export const refreshToken = async (
     }
 
     let account
-    if(decoded.role === 'user'){
+    if (decoded.role === 'user') {
       account = await prisma.users.findUnique({ where: { id: decoded.id } })
-    }else if(decoded.role === "seller"){
+    } else if (decoded.role === "seller") {
       account = await prisma.sellers.findUnique({
-            where: {id: decoded.id},
-            include: {shop: true}
-          })
+        where: { id: decoded.id },
+        include: { shop: true }
+      })
     }
 
     if (!account) {
@@ -165,13 +165,13 @@ export const refreshToken = async (
 
     const newAccessToken = jwt.sign(
       { id: decoded.id, role: decoded.role },
-      process.env.ACCESS_TOKEN_SECRET  as string,
+      process.env.ACCESS_TOKEN_SECRET as string,
       { expiresIn: "15m" }
     )
 
-    if(decoded.role === "user"){
+    if (decoded.role === "user") {
       setCookie(res, "access_token", newAccessToken)
-    }else if(decoded.role === "seller"){
+    } else if (decoded.role === "seller") {
       setCookie(res, "seller-access-token", newAccessToken)
     }
 
@@ -385,8 +385,8 @@ export const createStripeConnectLink = async (
       email: seller?.email,
       country: "GB",
       capabilities: {
-        card_payments: {requested: true},
-        transfers: {requested: true}
+        card_payments: { requested: true },
+        transfers: { requested: true }
       }
     })
 
@@ -406,7 +406,7 @@ export const createStripeConnectLink = async (
       type: "account_onboarding"
     })
 
-    res.json({url: accountLink.url})
+    res.json({ url: accountLink.url })
   } catch (error) {
     next(error)
   }
@@ -437,7 +437,7 @@ export const loginSeller = async (
 
     res.clearCookie("seller-access-token")
     res.clearCookie("seller-refresh-token")
-    
+
     //Generate access and refresh token
     const accessToken = jwt.sign(
       { id: seller.id, role: "seller" },
@@ -481,3 +481,122 @@ export const getSeller = async (
     return next(error)
   }
 }
+
+// log out admin
+export const logOutAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  res.clearCookie("access_token")
+  res.clearCookie("refresh_token")
+
+  return res.status(201).json({ success: true })
+}
+
+// add new address
+export const addUserAddress = async (
+  req: any,
+  res: Response,
+  next: NextFunction) => {
+  try {
+    const userId = req.user?.id
+    const {label, name, street, city, zip, country, isDefault} = req.body
+
+    if(!label || !name || !street || !city || !zip || !country ){
+      return next(new validationError("All fields are required"))
+    }
+
+    if(isDefault){
+      await prisma.address.updateMany({
+        where:{
+          userId,
+          isDefault: true,
+        },
+        data: {
+          isDefault: false
+        }
+      })
+    }
+
+    const newAddress = await prisma.address.create({
+      data: {
+        userId,
+        label,
+        name,
+        street,
+        city,
+        zip,
+        country,
+        isDefault
+      }
+    })
+
+    return res.status(201).json({ success: true, address: newAddress })
+
+  } catch (error) {
+    return next(error)    
+  }
+}
+
+// delete new address
+export const deleteUserAddress = async (
+  req: any,
+  res: Response,
+  next: NextFunction) => {
+  try {
+    const userId = req.user?.id
+    const {addressId} = req.params
+
+    if(!addressId){
+      return next(new validationError("Address ID are required"))
+    }
+    
+    const existingAddress = await prisma.address.findFirst({
+      where: {
+        id: addressId,
+        userId,
+      }
+    })
+
+    if(!existingAddress){
+      return next(new NotFoundError("Address not found or unauthorized"))
+
+    }
+
+    await prisma.address.delete({
+      where: {
+        id: addressId,
+      }
+    })
+
+    return res.status(200).json({ success: true, message: "Address deleted successfully" })
+
+  } catch (error) {
+    return next(error)    
+  }
+}
+
+// get new address
+export const getUserAddresses = async (
+  req: any,
+  res: Response,
+  next: NextFunction) => {
+  try {
+    const userId = req.user?.id
+    
+    const addresses = await prisma.address.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    })
+
+    return res.status(200).json({ success: true, addresses})
+
+  } catch (error) {
+    return next(error)    
+  }
+}
+

@@ -16,11 +16,29 @@ const page = () => {
     staleTime: 1000 * 60 * 2
   })
 
-   const {data: latestProducts} = useQuery({
+   const {data: latestProducts, isLoading: latestProductsIsLoading} = useQuery({
     queryKey: ["latest-products"],
     queryFn: async () => {
       const res = await axiosInstance.get("/product/api/get-all-products?page=1&limit=10&type=latest")
       return res?.data?.products
+    },
+    staleTime: 1000 * 60 * 2
+  })
+
+  const {data: shops, isLoading: shopLoading} = useQuery({
+    queryKey: ["shops"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/top-shops")
+      return res?.data?.shops
+    },
+    staleTime: 1000 * 60 * 2
+  })
+
+  const {data: offers, isLoading: offersLoading} = useQuery({
+    queryKey: ["offers"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/get-all-events?page=1&limit=10")
+      return res?.data?.events
     },
     staleTime: 1000 * 60 * 2
   })
@@ -50,6 +68,64 @@ const page = () => {
         ))}
        </div>
       )}
+
+      {products?.length === 0 && (
+        <p className="text-center">No Products available yet!</p>
+      )}
+
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-">
+          {Array.from({length: 10}).map((_, index) => (
+            <div
+             key={index}
+             className="h-[250px] bg-gray-300 animate-pulse rounded-xl"
+            >
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="my-8 block">
+        <SectionTitle title="Latest Products" />
+      </div>
+      {!latestProductsIsLoading && (
+       <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-5">
+        {latestProducts?.map((product:any) => (
+         <ProductCard key={product.id} product={product}/>
+        ))}
+       </div>
+      )}
+
+      {latestProducts?.length === 0 && (
+        <p className="text-center">No Products available yet!</p>
+      )}
+
+      <div className="my-8 block">
+        <SectionTitle title="Top Shops" />
+      </div>
+
+      {!shopLoading && (
+       <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-5">
+        {shops?.map((shop:any) => (
+         <ShopCard key={shop.id} shop={shop}/>
+        ))}
+       </div>
+      )}
+
+      <div className="my-8 block">
+        <SectionTitle title="Top offers" />
+      </div>
+
+      {!offersLoading && !isError && (
+       <div className="m-auto grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-5">
+        {offers?.map((product:any) => (
+         <ProductCard key={product.id} product={product} isEvent={true}/>
+        ))}
+       </div>
+      )}
+
+      
+
     </div>
   </div>
   )
