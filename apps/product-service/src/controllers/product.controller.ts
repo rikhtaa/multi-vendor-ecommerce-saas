@@ -394,7 +394,7 @@ export const getAllProducts = async (req: any, res: Response, next: NextFunction
         take: limit,
         include: {
           images: true,
-          shop: true
+          Shop: true
         },
         where: baseFilter,
         orderBy: {
@@ -425,6 +425,60 @@ export const getAllProducts = async (req: any, res: Response, next: NextFunction
 }
 
 //get All products 
+export const getAllEvents = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 20
+    const skip = (page - 1) * limit
+    const type = req.query.type
+
+    const baseFilter = {
+      isDeleted: false
+    }
+
+    const orderBy: Prisma.productsOrderByWithRelationInput =
+      type === "latest"
+        ? { createdAt: "desc" as Prisma.SortOrder }
+        : { totalSales: "desc" as Prisma.SortOrder }
+
+    const [events, total, top10Products] = await Promise.all([
+      prisma.events.findMany({
+        skip,
+        take: limit,
+        include: {
+          images: true,
+          shop: true
+        },
+        where: baseFilter,
+        orderBy: {
+          totalSales: "desc"
+        }
+      }),
+
+      prisma.events.count({ where: baseFilter }),
+      prisma.events.findMany({
+        take: 10,
+        where: baseFilter,
+        orderBy,
+      })
+    ])
+
+    return res.status(200).json({
+      events,
+      top10By: type === "latest" ? "latest" : "topSales",
+      top10Products,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit)
+    })
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+//get All products 
 export const getProductDetails = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
@@ -434,7 +488,7 @@ export const getProductDetails = async (req: Request, res: Response, next: NextF
       },
       include: {
         images: true,
-        shop: true,
+        Shop: true,
       },
     })
 
@@ -500,7 +554,7 @@ export const getFilteredProducts = async (req: Request, res: Response, next: Nex
         take: parsedLimit,
         include: {
           images: true,
-          shop: true,
+          Shop: true,
         },
       }),
       prisma.products.count({ where: filters }),
@@ -576,7 +630,7 @@ export const getFilteredEvents = async (req: Request, res: Response, next: NextF
         take: parsedLimit,
         include: {
           images: true,
-          shop: true,
+          Shop: true,
         },
       }),
       prisma.products.count({ where: filters }),
