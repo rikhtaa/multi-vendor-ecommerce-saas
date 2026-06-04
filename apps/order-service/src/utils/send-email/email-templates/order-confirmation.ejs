@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Order Confirmation Email</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+        /* Base */
+        body {
+            margin: 0;
+            padding: 0;
+            min-width: 100%;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            background-color: #fafafa;
+            color: #222222;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+
+        table td {
+            vertical-align: top;
+        }
+
+        /* Layout */
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .email-header {
+            padding: 24px;
+            color: #ffffff;
+        }
+
+        .email-body {
+            padding: 24px;
+            background-color: #ffffff;
+        }
+
+        .email-footer {
+            background-color: #f6f6f6;
+            padding: 24px;
+        }
+
+        /* Buttons */
+        .button {
+            background-color: #0070f3;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-wrapper">
+        <div class="email-header">
+            <h1>Order Confirmed!</h1>
+        </div>
+        <div class="email-body">
+            <p>Hello <%= name %>,</p>
+            <p>
+                Thank you for your purchase! We've received your order and will start
+                processing it shortly.
+            </p>
+            <div class="order-summary">
+                <% cart.forEach(item=> { %>
+                    <p>
+                        🛒 <strong>
+                            <%= item.title %>
+                        </strong> - <%= item.quantity %> x $<%= item.sale_price.toFixed(2) %>
+                    </p>
+                    <% }) %>
+                        <p class="total">Total: $<%= totalAmount.toFixed(2) %>
+                        </p>
+            </div>
+
+            <a href="<%= trackingUrl %>" class="button">📦 Track Your Order</a>
+
+            <p style="margin-top: 20px">
+                If you have any questions, just reply to this email or contact us at
+                <a href="mailto:support@eshop.com">support@eshop.com</a>
+            </p>
+        </div>
+        <div class="footer">
+            &copy; <%= new Date().getFullYear() %> Eshop. All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>
