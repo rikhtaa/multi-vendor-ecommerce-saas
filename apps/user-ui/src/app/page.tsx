@@ -5,6 +5,7 @@ import SectionTitle from '../shared/modules/section/section-title'
 import axiosInstance from '../utils/axiosInstance'
 import { useQuery } from '@tanstack/react-query'
 import ProductCard from '../shared/components/cards/product-card'
+import ShopCard from '../shared/components/cards/shop-card'
 
 const page = () => {
    const {data: products, isLoading, isError} = useQuery({
@@ -123,9 +124,6 @@ const page = () => {
         ))}
        </div>
       )}
-
-      
-
     </div>
   </div>
   )
