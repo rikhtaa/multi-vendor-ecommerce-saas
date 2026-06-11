@@ -5,7 +5,6 @@ import { Prisma } from "@prisma/client";
 import { NextFunction, Response } from "express";
 import Stripe from "stripe"
 import { sendEmail } from "../utils/send-email";
-import { success } from "zod";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia"
@@ -634,4 +633,22 @@ export const getUserOrders = async (req: any, res: Response, next: NextFunction)
   } catch (error) {
     return next(error)
   }
+}
+
+// get all orders admin
+export const getAdminOrders = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const orders = await prisma.orders.findMany({
+          include: {
+            user: true,
+            shop: true,
+          },
+          orderBy: { createdAt: "desc" },
+        })
+
+        res.status(200).json({ success: true, orders })
+
+    } catch (error) {
+        return next(error)
+    }
 }
