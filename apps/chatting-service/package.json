@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/chatting-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve chatting-service"
+  },
+  "nx": {
+    "name": "chatting-service",
+    "projectType": "application",
+    "sourceRoot": "apps/chatting-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/chatting-service",
+          "main": "apps/chatting-service/src/main.ts",
+          "tsConfig": "apps/chatting-service/tsconfig.app.json",
+          "webpackConfig": "apps/chatting-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/chatting-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "chatting-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "chatting-service:build:development"
+          },
+          "production": {
+            "buildTarget": "chatting-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}
