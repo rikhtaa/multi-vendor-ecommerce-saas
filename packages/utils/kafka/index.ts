@@ -14,4 +14,10 @@ export const kafka = new Kafka({
     username: process.env.KAFKA_API_KEY!,
     password: process.env.KAFKA_API_SECRET!,
   },
+   connectionTimeout: 30000,  // default is 1000ms, way too tight for PK → US
+  requestTimeout: 60000,
+  retry: {
+    initialRetryTime: 1000,
+    retries: 10,
+  },
 });

@@ -9,6 +9,8 @@ import useLocationTracking from 'apps/user-ui/src/hooks/useLocationTracking'
 import useDeviceTracking from 'apps/user-ui/src/hooks/useDeviceTracking'
 import { useStore } from '../../store'
 import useUser from 'apps/user-ui/src/hooks/useUser'
+import axiosInstance from 'apps/user-ui/src/utils/axiosInstance'
+import { isProtected } from 'apps/user-ui/src/utils/protected'
 
 const ProductDetailsCard = ({
   data, setOpen
@@ -20,6 +22,9 @@ const ProductDetailsCard = ({
   const [isSelected, setIsSelected] = useState(data?.colors?.[0] || "")
   const [isSizeSelected, setIsSizeSelected] = useState(data?.colors?.[0] || "")
   const [quantity, setQuantity] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  
+
   const { user } = useUser()
   const location = useLocationTracking()
   const deviceInfo = useDeviceTracking()
@@ -36,6 +41,26 @@ const ProductDetailsCard = ({
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5)
 
   const router = useRouter()
+
+  const handleChat = async () => {
+      if(isLoading){
+        return
+      }
+      setIsLoading(true)
+
+      try {
+        const res = await axiosInstance.post(
+          '/chatting/api/create-user-conversationGroup',
+          {sellerId: data?.Shop?.sellerId},
+          isProtected
+        )
+        router.push(`/inbox/?conversationId=${res.data.conversation.id}`)
+      } catch (error) {
+        console.log(error)
+      }finally{
+        setIsLoading(false)
+      }
+  }
 
   return (
     <div className='fixed flex items-center justify-center top-0 left-0 h-screen w-full bg-[#000001d] z-50'
@@ -109,8 +134,9 @@ const ProductDetailsCard = ({
               </div>
 
               {/* Chat with Seller Button */}
-              <button className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-                onClick={() => router.push(`/inbox?shopId=${data?.Shop?.id}`)}
+              <button 
+               className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                onClick={() => handleChat()}
               >
                 <MessageCircle size={18} />
                 Chat with Seller
