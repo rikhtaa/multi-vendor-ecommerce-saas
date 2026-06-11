@@ -23,6 +23,21 @@
     },
     {
       "path": "./apps/order-service"
+    },
+    {
+      "path": "./apps/admin-service"
+    },
+    {
+      "path": "./apps/admin-ui"
+    },
+    {
+      "path": "./apps/chatting-service"
+    },
+    {
+      "path": "./apps/logger-service"
+    },
+    {
+      "path": "./apps/recommendation-service"
     }
   ]
 }
