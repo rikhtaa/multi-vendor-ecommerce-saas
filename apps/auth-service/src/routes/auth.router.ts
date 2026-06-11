@@ -1,7 +1,7 @@
 import express, { Router } from "express"
-import { addUserAddress, createShop, createStripeConnectLink, deleteUserAddress, getSeller, getUser, getUserAddresses, loginSeller, loginUser, logOutAdmin, refreshToken, registerSeller, resetUserPassword, updateUserPassword, userForgetPassword, userRegistration, verifyForgetPassword, verifySeller, verifyUser } from "../controller/auth.controller"
+import { addUserAddress, createShop, createStripeConnectLink, deleteUserAddress, getAdminOrders, getLoggedInAdmin, getSeller, getUser, getUserAddresses, loginAdmin, loginSeller, loginUser, logOutAdmin, refreshToken, registerSeller, resetUserPassword, updateUserPassword, userForgetPassword, userRegistration, verifyForgetPassword, verifySeller, verifyUser } from "../controller/auth.controller"
 import isAuthenticated from "@packages/middleware/isAuthenticated"
-import { isSeller } from "@packages/middleware/authorizeRoles"
+import { isAdmin, isSeller } from "@packages/middleware/authorizeRoles"
 
 const router: Router = express.Router()
 
@@ -23,5 +23,7 @@ router.get("/shipping-addresses", isAuthenticated, getUserAddresses);
 router.post("/add-address", isAuthenticated, addUserAddress);
 router.delete("/delete-address/:addressId", isAuthenticated, deleteUserAddress);
 router.post("/change-password", isAuthenticated, updateUserPassword);
+router.post("/login-admin", loginAdmin)
+router.get("/logged-in-admin",isAuthenticated, getLoggedInAdmin) 
 
 export default router

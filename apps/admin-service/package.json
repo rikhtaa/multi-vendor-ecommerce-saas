@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/admin-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve admin-service"
+  },
+  "nx": {
+    "name": "admin-service",
+    "projectType": "application",
+    "sourceRoot": "apps/admin-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/admin-service",
+          "main": "apps/admin-service/src/main.ts",
+          "tsConfig": "apps/admin-service/tsconfig.app.json",
+          "webpackConfig": "apps/admin-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/admin-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "admin-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "admin-service:build:development"
+          },
+          "production": {
+            "buildTarget": "admin-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}

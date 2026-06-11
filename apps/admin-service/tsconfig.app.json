@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "outDir": "out-tsc/admin-service",
+    "types": ["node", "express"],
+    "rootDir": "../../",
+    "tsBuildInfoFile": "out-tsc/admin-service/tsconfig.app.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../packages/**/**.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "../../generated/**"
+  ]
+}
