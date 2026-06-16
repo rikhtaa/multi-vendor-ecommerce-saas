@@ -12,11 +12,20 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
    images: {
-    remotePatterns: [
+     remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "images.unsplash.com",
+    },
+    {
+      protocol: "https",
+      hostname: "ik.imagekit.io",
+    },
       {
-        hostname: "ik.imagekit.io"
-      }
-    ]
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+  ],
   }
 };
 
