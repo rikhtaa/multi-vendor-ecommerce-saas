@@ -1,0 +1,63 @@
+{
+  "name": "@eshop/seller-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx serve seller-service"
+  },
+  "nx": {
+    "name": "seller-service",
+    "projectType": "application",
+    "sourceRoot": "apps/seller-service/src",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
+        "options": {
+          "target": "node",
+          "outputPath": "out-tsc/seller-service",
+          "main": "apps/seller-service/src/main.ts",
+          "tsConfig": "apps/seller-service/tsconfig.app.json",
+          "webpackConfig": "apps/seller-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/seller-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "seller-service:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "seller-service:build:development"
+          },
+          "production": {
+            "buildTarget": "seller-service:build:production"
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}

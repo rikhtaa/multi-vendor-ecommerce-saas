@@ -38,6 +38,9 @@
     },
     {
       "path": "./apps/recommendation-service"
+    },
+    {
+      "path": "./apps/seller-service"
     }
   ]
 }
