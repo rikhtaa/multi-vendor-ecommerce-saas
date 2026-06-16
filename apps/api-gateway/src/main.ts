@@ -47,6 +47,10 @@ app.use("/chatting", proxy("http://localhost:6006", {
   proxyReqPathResolver: (req) => req.originalUrl.replace("/chatting", ""),
   proxyReqOptDecorator: forwardCookies  
 }))
+app.use("/seller", proxy("http://localhost:6007", {
+  proxyReqPathResolver: (req) => req.originalUrl.replace("/seller", ""),
+  proxyReqOptDecorator: forwardCookies  
+}))
 
 app.use("/", proxy("http://localhost:6001", {
   proxyReqOptDecorator: forwardCookies  

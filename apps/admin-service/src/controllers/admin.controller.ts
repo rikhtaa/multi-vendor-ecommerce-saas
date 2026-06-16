@@ -1,8 +1,7 @@
 "use client"
-import { validationError } from "@packages/error-handler"
+import { AuthError, validationError } from "@packages/error-handler"
 import prisma from "@packages/libs/prisma"
 import { NextFunction, Response } from "express"
-import { success } from "zod"
 
 // get All products 
 export const getAllProducts = async (req: any, res: Response, next: NextFunction) => {
@@ -203,7 +202,7 @@ export const getAllUsers = async (req: any, res: Response, next: NextFunction) =
       prisma.users.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: "desc"},
+        orderBy: { createdAt: "desc" },
         select: {
           id: true,
           name: true,
@@ -242,7 +241,7 @@ export const getAllSellers = async (req: any, res: Response, next: NextFunction)
       prisma.sellers.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: "desc"},
+        orderBy: { createdAt: "desc" },
         select: {
           id: true,
           name: true,
@@ -276,3 +275,49 @@ export const getAllSellers = async (req: any, res: Response, next: NextFunction)
   }
 }
 
+// get all notifications 
+export const getAllNotifications = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const notifications = await prisma.notifications.findMany({
+            orderBy: { createdAt: "desc" }
+        })
+
+        return res.status(200).json({ success: true, notifications })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+// get user notifications 
+export const getUserNotifications = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const notifications = await prisma.notifications.findMany({
+      where: {
+        receiverId: req.user?.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+// get logged inadmin
+export const getLoggedInAdmin = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        return res.status(200).json({ success: true, admin: req.admin })
+    } catch (error) {
+        return next(error)
+    }
+}
