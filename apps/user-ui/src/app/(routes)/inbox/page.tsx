@@ -46,8 +46,6 @@ const Page = () => {
         staleTime: 2 * 60 * 1000
     });
 
-    console.log(messages)
-
     const loadMoreMessages = async () => {
         const nextPage = page + 1;
         const res = await axiosInstance.get(
@@ -91,6 +89,46 @@ const Page = () => {
         }
     }, [conversationId, chats]);
 
+    useEffect(() => {
+        if (!ws) return
+        ws.onmessage = (event: any) => {
+            const data = JSON.parse(event.data)
+            if (data.type === "NEW_MESSAGE") {
+                const newMsg = data?.payload
+                if (newMsg.conversationId === conversationId) {
+                    queryClient.setQueryData(["messages", conversationId], (old: any = []) => [
+                        ...old,
+                        {
+                            content: newMsg.content || "",
+                            senderType: newMsg.senderType,
+                            seen: false,
+                            createdAt: newMsg.createdAt || new Date().toISOString(),
+                        }
+                    ])
+                    scrollToBottom()
+                }
+                setChats((prevChats) =>
+                    prevChats.map((chat) =>
+                        chat.conversationId === newMsg.conversationId
+                            ? { ...chat, lastMessage: newMsg.content }
+                            : chat
+                    )
+                )
+            }
+            if (data.type === "UNSEEN_COUNT_UPDATE") {
+                const { conversationId, count } = data.payload
+                setChats((prevChats) =>
+                    prevChats.map((chat) =>
+                        chat.conversationId === conversationId
+                            ? { ...chat, unreadCount: count }
+                            : chat
+                    )
+                )
+            }
+        }
+    }, [ws, queryClient, conversationId])
+
+
     const handleChatSelect = (chat: any) => {
         setHasFetchedOnce(false);
         setChats((prev) =>
@@ -129,19 +167,6 @@ const Page = () => {
         }
 
         ws?.send(JSON.stringify(payload))
-
-        queryClient.setQueryData(
-            ["messages", selectedChat.conversationId],
-            (old: any = []) => [
-                ...old,
-                {
-                    content: payload.messageBody,
-                    senderType: "user",
-                    seen: false,
-                    createdAt: new Date().toISOString(),
-                }
-            ]
-        )
 
         setChats((prevChats) =>
             prevChats.map((chat) =>
@@ -202,9 +227,17 @@ const Page = () => {
                                                             <span className="w-2 h-2 rounded-full bg-green-500"></span>
                                                         )}
                                                     </div>
-                                                    <p className="text-xs text-gray-500 truncate max-w-[170px]">
-                                                        {getLastMessage(chat)}
-                                                    </p>
+                                                    <div className="flex items-center justify-between">
+                                                            <p className="text-xs text-gray-500 truncate max-w-[170px]">
+                                                                {getLastMessage(chat)}
+                                                            </p>
+
+                                                            {chat.unreadCount > 0 && (
+                                                                <span className="ml-2 flex-shrink-0 bg-[#5865f2] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                                                    {chat.unreadCount}
+                                                                </span>
+                                                            )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </button>
@@ -254,8 +287,8 @@ const Page = () => {
                                             className={`flex flex-col ${msg.senderType === "user" ? "items-end" : "items-start"}`}
                                         >
                                             <div className={`${msg.senderType === "user"
-                                                    ? "bg-blue-600 text-white"
-                                                    : "bg-white text-gray-800"
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-white text-gray-800"
                                                 } px-4 py-2 rounded-lg shadow-sm w-fit`}
                                             >
                                                 {msg.text || msg.content}

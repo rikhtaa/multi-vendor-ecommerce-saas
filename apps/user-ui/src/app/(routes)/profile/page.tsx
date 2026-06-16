@@ -9,6 +9,7 @@ import OrdersTable from 'apps/user-ui/src/shared/components/tables/orders-table'
 import axiosInstance from 'apps/user-ui/src/utils/axiosInstance'
 import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOut, MapPin, Pencil, PhoneCall, Receipt, Settings, ShoppingBag, Truck, User } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -18,7 +19,7 @@ const Page = () => {
     const queryClient = useQueryClient()
 
     const { user, isLoading } = useRequiredAuth()
-    const {data: orders = []} = useQuery({
+    const { data: orders = [] } = useQuery({
         queryKey: ["user-orders"],
         queryFn: async () => {
             const res = await axiosInstance.get(`/order/api/get-user-orders`)
@@ -28,12 +29,12 @@ const Page = () => {
 
     const totalOrders = orders.length
     const processingOrders = orders.filter(
-        (o:any) =>
+        (o: any) =>
             o?.deliveryStatus !== "Delivered" && o.deliveryStatus !== "Cancelled"
     ).length
     const completedOrders = orders.filter(
-       (o:any) =>
-            o?.deliveryStatus === "Delivered" 
+        (o: any) =>
+            o?.deliveryStatus === "Delivered"
     ).length
 
     const queryTab = searchParams.get("active") || "Profile"
@@ -52,6 +53,20 @@ const Page = () => {
             queryClient.invalidateQueries({ queryKey: ["user"] })
 
             router.push("/login")
+        })
+    }
+
+    const { data: notifications, isLoading: notificationsLoading } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: async () => {
+            const res = await axiosInstance.get("/admin/api/get-user-notifications")
+            return res.data.notifications
+        }
+    })
+
+     const markAsRead = async (notificationId: string) => {
+        await axiosInstance.post("/seller/api/mark-notification-as-read", {
+            notificationId
         })
     }
     return (
@@ -171,9 +186,41 @@ const Page = () => {
                             <OrdersTable />
                         ) : activeTab === "Change Password" ? (
                             <ChangePassword />
-                        ) : 
-                        <></>
-                    }
+                        ) : activeTab === "Notifications" ? (
+                                <div className="space-y-4 text-sm text-gray-700">
+                                    {!notificationsLoading && notifications?.length === 0 && (
+                                        <p>No Notifications available yet!</p>
+                                    )}
+
+                                    <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
+                                        {notifications.map((d: any) => (
+                                            <Link
+                                                key={d.id}
+                                                href={d.redirect_link}
+                                                className={`block px-5 py-4 transition ${d.status === "Unread"
+                                                        ? "hover:bg-gray-800/40"
+                                                        : "bg-gray-800/50 hover:bg-gray-800/70"
+                                                    }`}
+                                                onClick={() => markAsRead(d.id)}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white font-medium">{d.title}</span>
+                                                        <span className="text-gray-300 text-sm">{d.message}</span>
+                                                        <span className="text-gray-500 text-xm mt-1">
+                                                            {new Date(d.createdAt).toLocaleString("en-UK", {
+                                                                dateStyle: "medium"
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                            <p>Not Found</p>
+                        )}
                     </div>
 
                     {/* Right Quick Panel */}

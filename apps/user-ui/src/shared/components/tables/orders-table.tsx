@@ -41,7 +41,7 @@ const OrdersTable = () => {
             header: "Actions",
             cell: ({ row }) => (
                 <button
-                    onClick={() => router.push(`/dashboard/order/${row.original.id}`)}
+                    onClick={() => router.push(`order/${row.original.id}`)}
                     className="text-blue-400 hover:underline text-xs flex items-center gap-1"
                 >
                     Track Order <ArrowUpRight className="w-3 h-3" />

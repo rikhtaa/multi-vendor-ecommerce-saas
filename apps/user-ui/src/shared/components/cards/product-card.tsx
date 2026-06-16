@@ -38,10 +38,11 @@ const ProductCard = ({ product, isEvent }: { product: any, isEvent?: boolean }) 
                     const minutes = Math.floor((diff / (1000 * 60)) % 60)
                     setTimeLeft(`${days}d ${hours}h ${minutes}m left with this price.`)
                 }
-            }, 1000)                          // ← missing interval delay + closing )
-            return () => clearInterval(interval)  // ← moved outside setInterval
+            }, 1000)                        
+            return () => clearInterval(interval)  
         }
-    }, [isEvent, product?.ending_date])   // ← missing closing )
+    }, [isEvent, product?.ending_date])  
+    
     return (
         <div className='w-full min-h-[350px] h-max bg-white rounded-lg relative shadow-sm hover:shadow-md transition'>
             {isEvent && (
@@ -67,8 +68,8 @@ const ProductCard = ({ product, isEvent }: { product: any, isEvent?: boolean }) 
             </Link>
 
             <div className="p-3">
-                <Link href={`/shop/${product?.shop?.id}`} className='block text-blue-500 text-sm font-medium mb-1'>
-                    {product?.shop?.name}
+                <Link href={`/shop/${product?.Shop?.id}`} className='block text-blue-500 text-sm font-medium mb-1'>
+                    {product?.Shop?.name}
                 </Link>
 
                 <Link href={`/product/${product?.slug}`}>

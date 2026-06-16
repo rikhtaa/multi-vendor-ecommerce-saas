@@ -11,9 +11,11 @@ import useLocationTracking from 'apps/user-ui/src/hooks/useLocationTracking'
 import useUser from 'apps/user-ui/src/hooks/useUser'
 import ProductCard from '../../components/cards/product-card'
 import axiosInstance from 'apps/user-ui/src/utils/axiosInstance'
+import { useRouter } from 'next/navigation'
 
 const ProductDetails = ({ productDetails }: { productDetails: any }) => {
     const { user } = useUser()
+    const router = useRouter()
     const location = useLocationTracking()
     const deviceInfo = useDeviceTracking()
     const [currentImage, setCurrentImage] = useState(productDetails?.images[0]?.url)
@@ -23,6 +25,8 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
     const [quantity, setQuantity] = useState(1)
     const [priceRange, setPriceRange] = useState([productDetails?.sale_price, 1199])
     const [recommendedProducts, setRecommendedProducts] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+
 
     const addToCart = useStore((state: any) => state.addToCart)
     const addToWishlist = useStore((state: any) => state.addToWishList)
@@ -70,6 +74,25 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
     useEffect(() => {
         fetchFilteredProducts()
     }, [priceRange])
+
+     const handleChat = async () => {
+        if (isLoading) {
+          return
+        }
+        setIsLoading(true)
+    
+        try {
+          const res = await axiosInstance.post(
+            '/chatting/api/create-user-conversationGroup',
+            { sellerId: productDetails?.Shop?.sellerId }
+          )
+          router.push(`/inbox/?conversationId=${res.data.conversation.id}`)
+        } catch (error) {
+          console.log(error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
 
     return (
         <div className='w-full bg-[#f5f5f5] py-5'>
@@ -315,6 +338,7 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
                                 </div>
                                 <Link
                                     href={"#"}
+                                    onClick={()=> handleChat()}
                                     className="text-blue-500 text-sm flex items-center gap-1"
                                 >
                                     <MessageSquareText />

@@ -28,7 +28,9 @@ const useUser = () => {
         },
         onError: () => {
             setLoggedIn(false)
-        }
+        },
+        refetchOnMount: false,     
+        refetchOnWindowFocus: false 
     })
 
     return {user: user as any, isLoading:isPending, isError}

@@ -1,7 +1,7 @@
 "use client"
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Ratings from '../ratings'
 import { Heart, MapPin, MessageCircle, ShoppingBag, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -23,7 +23,7 @@ const ProductDetailsCard = ({
   const [isSizeSelected, setIsSizeSelected] = useState(data?.colors?.[0] || "")
   const [quantity, setQuantity] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  
+
 
   const { user } = useUser()
   const location = useLocationTracking()
@@ -43,27 +43,34 @@ const ProductDetailsCard = ({
   const router = useRouter()
 
   const handleChat = async () => {
-      if(isLoading){
-        return
-      }
-      setIsLoading(true)
+    if (isLoading) {
+      return
+    }
+    setIsLoading(true)
 
-      try {
-        const res = await axiosInstance.post(
-          '/chatting/api/create-user-conversationGroup',
-          {sellerId: data?.Shop?.sellerId},
-          isProtected
-        )
-        router.push(`/inbox/?conversationId=${res.data.conversation.id}`)
-      } catch (error) {
-        console.log(error)
-      }finally{
-        setIsLoading(false)
-      }
+    try {
+      const res = await axiosInstance.post(
+        '/chatting/api/create-user-conversationGroup',
+        { sellerId: data?.Shop?.sellerId },
+        isProtected
+      )
+      router.push(`/inbox/?conversationId=${res.data.conversation.id}`)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [])
+
   return (
-    <div className='fixed flex items-center justify-center top-0 left-0 h-screen w-full bg-[#000001d] z-50'
+    <div className='fixed flex items-center justify-center top-0 left-0 h-screen w-full bg-[#000001d] z-[999]'
       onClick={() => setOpen(false)}
     >
       <div className="w-[90%] md:w-[70%] md:mt-14 2xl:mt-0 h-max overflow-scroll min-h-[70vh] p-4 md:p-6 bg-white shadow-md rounded-lg"
@@ -105,7 +112,7 @@ const ProductDetailsCard = ({
               <div className="flex items-start gap-3">
                 {/* Shop Logo */}
                 <Image
-                  src={data?.shop?.avatar}
+                  src={data?.shop?.avatar || "https://plus.unsplash.com/premium_vector-1682269284255-8209b981c625?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
                   alt="Shop Logo"
                   width={60}
                   height={60}
@@ -134,8 +141,8 @@ const ProductDetailsCard = ({
               </div>
 
               {/* Chat with Seller Button */}
-              <button 
-               className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+              <button
+                className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
                 onClick={() => handleChat()}
               >
                 <MessageCircle size={18} />
@@ -253,7 +260,7 @@ const ProductDetailsCard = ({
                       Add to Cart
                     </button>
                     <button className="opacity-[.7] cursor-pointer">
-                      <Heart 
+                      <Heart
                         size={30}
                         fill={isWishlisted ? "red" : "transparent"}
                         color={isWishlisted ? "transparent" : "black"}
@@ -262,7 +269,7 @@ const ProductDetailsCard = ({
                             ? removeFromWishList(data.id, user, location, deviceInfo)
                             : addToWishlist({ ...data, quantity: 1 }, user, location, deviceInfo)
                         }
-                        />
+                      />
                     </button>
                   </div>
                   <div className="mt-3">
