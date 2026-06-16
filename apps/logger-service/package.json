@@ -2,65 +2,62 @@
   "name": "@eshop/logger-service",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "nx serve logger-service"
+  },
   "nx": {
+    "name": "logger-service",
+    "projectType": "application",
+    "sourceRoot": "apps/logger-service/src",
     "targets": {
-      "prune-lockfile": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "executor": "@nx/js:prune-lockfile",
-        "outputs": [
-          "{workspaceRoot}/apps/logger-service/dist/package.json",
-          "{workspaceRoot}/apps/logger-service/dist/package-lock.json"
-        ],
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
         "options": {
-          "buildTarget": "build"
+          "target": "node",
+          "outputPath": "out-tsc/logger-service",
+          "main": "apps/logger-service/src/main.ts",
+          "tsConfig": "apps/logger-service/tsconfig.app.json",
+          "webpackConfig": "apps/logger-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/logger-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
         }
-      },
-      "copy-workspace-modules": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "outputs": [
-          "{workspaceRoot}/apps/logger-service/dist/workspace_modules"
-        ],
-        "executor": "@nx/js:copy-workspace-modules",
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "prune": {
-        "dependsOn": [
-          "prune-lockfile",
-          "copy-workspace-modules"
-        ],
-        "executor": "nx:noop"
       },
       "serve": {
-        "continuous": true,
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
-        "dependsOn": [
-          "build"
-        ],
+        "dependsOn": ["build"],
         "options": {
-          "buildTarget": "@eshop/logger-service:build",
+          "buildTarget": "logger-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@eshop/logger-service:build:development"
+            "buildTarget": "logger-service:build:development"
           },
           "production": {
-            "buildTarget": "@eshop/logger-service:build:production"
+            "buildTarget": "logger-service:build:production"
           }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
         }
       }
     }
-  },
-  "dependencies": {
-    "express": "^4.21.2"
   }
 }

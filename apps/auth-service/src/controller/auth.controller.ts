@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs"
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
 import { setCookie } from "../utils/cookies/setCookie";
 import Stripe from "stripe"
-import { sendLog } from "@packages/utils/logger";
+import { sendLog } from "@packages/utils/logs/send-logs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2026-04-22.dahlia",
@@ -191,6 +191,11 @@ export const getUser = async (
   next: NextFunction) => {
   try {
     const user = req.user
+    await sendLog({
+      type: "success",
+      message: `User data retrieved ${user?.email}`,
+      source: "auth-service",
+    })
 
     return res.status(201).json({ success: true, user })
   } catch (error) {
@@ -727,3 +732,16 @@ export const getLoggedInAdmin = async (req: any, res: Response, next: NextFuncti
         return next(error)
     }
 }
+
+// fetch layout data
+export const getLayoutData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const layout = await prisma.site_config.findFirst()
+        
+        res.status(200).json({ success: true, layout })
+
+    } catch (error) {
+        return next(error)
+    }
+}
+
