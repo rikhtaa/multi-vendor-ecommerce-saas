@@ -1,5 +1,4 @@
 "use client"
-
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useWebSocket } from 'apps/user-ui/src/context/web-socket-context'
 import useRequiredAuth from 'apps/user-ui/src/hooks/useRequiredAuth'
@@ -15,9 +14,9 @@ const Page = () => {
     const searchParams = useSearchParams()
     const { user, isLoading: userLoading } = useRequiredAuth()
     const router = useRouter()
-    const wsRef = useRef<WebSocket | null>(null)
     const messageContainerRef = useRef<HTMLDivElement | null>(null)
     const scrollAnchorRef = useRef<HTMLDivElement | null>(null)
+    const { ws } = useWebSocket()
     const queryClient = useQueryClient()
 
     const [chats, setChats] = useState<any[]>([]);
@@ -25,25 +24,23 @@ const Page = () => {
     const [message, setMessage] = useState("");
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
-    const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
     const conversationId = searchParams.get("conversationId");
-    const { ws, unreadCounts } = useWebSocket()
+
+    const conversationIdRef = useRef<string | null>(null)
+    conversationIdRef.current = conversationId  
 
     const { data: messages = [] } = useQuery({
         queryKey: ["messages", conversationId],
         queryFn: async () => {
-            if (!conversationId || hasFetchedOnce) return []
+            if (!conversationId) return []
             const res = await axiosInstance.get(
                 `/chatting/api/get-messages/${conversationId}?page=1`,
-                isProtected
             );
-            setPage(1)
-            setHasMore(res.data.hasMore)
-            setHasFetchedOnce(true)
+           
             return res.data.messages.reverse()
         },
         enabled: !!conversationId,
-        staleTime: 2 * 60 * 1000
+        staleTime: 0
     });
 
     const loadMoreMessages = async () => {
@@ -93,13 +90,16 @@ const Page = () => {
         if (!ws) return
         ws.onmessage = (event: any) => {
             const data = JSON.parse(event.data)
-            if (data.type === "NEW_MESSAGE") {
+
+            if (data.type === "NEXT_MESSAGE") {
                 const newMsg = data?.payload
-                if (newMsg.conversationId === conversationId) {
-                    queryClient.setQueryData(["messages", conversationId], (old: any = []) => [
+                 const currentId = conversationIdRef.current  // always fresh
+                 if (String(newMsg.conversationId) === String(currentId)) {
+                // if (newMsg.conversationId === conversationId) {
+                    queryClient.setQueryData(["messages", currentId], (old: any = []) => [
                         ...old,
                         {
-                            content: newMsg.content || "",
+                            content:  newMsg.messageBody || newMsg.content,
                             senderType: newMsg.senderType,
                             seen: false,
                             createdAt: newMsg.createdAt || new Date().toISOString(),
@@ -110,40 +110,41 @@ const Page = () => {
                 setChats((prevChats) =>
                     prevChats.map((chat) =>
                         chat.conversationId === newMsg.conversationId
-                            ? { ...chat, lastMessage: newMsg.content }
+                            ? { ...chat, lastMessage: newMsg.messageBody || newMsg.content }
                             : chat
                     )
                 )
             }
             if (data.type === "UNSEEN_COUNT_UPDATE") {
-                const { conversationId, count } = data.payload
+                const { conversationId: convId, count } = data.payload
                 setChats((prevChats) =>
                     prevChats.map((chat) =>
-                        chat.conversationId === conversationId
+                        chat.conversationId ===  String(convId)
                             ? { ...chat, unreadCount: count }
                             : chat
                     )
                 )
             }
         }
-    }, [ws, queryClient, conversationId])
+    }, [ws, queryClient])
 
 
     const handleChatSelect = (chat: any) => {
-        setHasFetchedOnce(false);
+        // setHasFetchedOnce(false);
         setChats((prev) =>
             prev.map((c) =>
                 c.conversationId === chat.conversationId ? { ...c, unreadCount: 0 } : c
             )
         );
         router.push(`?conversationId=${chat.conversationId}`);
-
+        
         ws?.send(
             JSON.stringify({
                 type: "MARK_AS_SEEN",
                 conversationId: chat.conversationId
             })
         )
+        
     };
 
     const scrollToBottom = () => {
@@ -157,7 +158,6 @@ const Page = () => {
     const handleSend = async (e: any) => {
         e.preventDefault()
         if (!message.trim() || !selectedChat) return
-
         const payload = {
             fromUserId: user?.id,
             toUserId: selectedChat?.seller?.id,
@@ -170,7 +170,7 @@ const Page = () => {
 
         setChats((prevChats) =>
             prevChats.map((chat) =>
-                chat.conversationId
+                chat.conversationId === selectedChat?.conversationId
                     ? { ...chat, lastMessage: payload.messageBody }
                     : chat
             )
@@ -202,7 +202,7 @@ const Page = () => {
                                     const isActive = selectedChat?.conversationId === chat.conversationId;
                                     return (
                                         <button
-                                            key={chat.conversation}
+                                            key={chat.conversationId}
                                             onClick={() => handleChatSelect(chat)}
                                             className={`w-full text-left px-4 py-3 transition hover:bg-blue-50
                                             ${isActive ? "bg-blue-100" : ""

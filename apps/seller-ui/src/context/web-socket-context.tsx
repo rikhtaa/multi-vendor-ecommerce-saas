@@ -1,45 +1,50 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const webSocketContext = createContext<any>(null)
 
-export const WebSocketProvider = ({ children, seller }: { children: React.ReactNode; seller: any }) => {
+export const WebSocketProvider = ({
+  children,
+  seller
+}: {
+  children: React.ReactNode;
+  seller: any;
+}) => {
+  const [wsReady, setWsReady] = useState(false)
   const wsRef = useRef<WebSocket | null>(null);
-  const [ws, setWs] = useState<WebSocket | null>(null) // reactive, not just a ref
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-  const listenersRef = useRef<Set<(data: any) => void>>(new Set())
 
   useEffect(() => {
-    if (!seller?.id) return
-    const socket = new WebSocket(process.env.NEXT_PUBLIC_CHATTING_WEBSOCKET_URI!)
-    wsRef.current = socket
+    if(!seller?.id) return
 
-    socket.onopen = () => {
-      socket.send(`seller_${seller.id}`)
-      setWs(socket) // triggers re-render with live socket
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_CHATTING_WEBSOCKET_URI!)
+    wsRef.current = ws
+
+    ws.onopen = () => {
+        ws.send(`seller_${seller.id}`)
+        setWsReady(true)
     }
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.type === "UNSEEN_COUNT_UPDATE") {
-        const { conversationId, count } = data.payload
-        setUnreadCounts((prev) => ({ ...prev, [conversationId]: count }))
-      }
-      // fan out to all subscribers (Page included)
-      listenersRef.current.forEach((fn) => fn(data))
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+
+        if(data.type === "UNSEEN_COUNT_UPDATE"){
+            const {conversationId, count} = data.payload
+            setUnreadCounts((prev) => ({...prev, [conversationId]: count}))
+        }
     }
 
-    return () => socket.close()
+    return () => {
+        ws.close()
+    }
   }, [seller?.id])
 
-  const subscribe = useCallback((fn: (data: any) => void) => {
-    listenersRef.current.add(fn)
-    return () => listenersRef.current.delete(fn)
-  }, [])
+  if(!wsReady) return null
 
-  return (
-    <webSocketContext.Provider value={{ ws, unreadCounts, subscribe }}>
-      {children}
+  return(
+    <webSocketContext.Provider value={{ws: wsRef.current, unreadCounts}}>
+        {children}
     </webSocketContext.Provider>
   )
 };

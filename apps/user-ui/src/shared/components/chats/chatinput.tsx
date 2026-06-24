@@ -1,5 +1,5 @@
 import { PickerProps } from "emoji-picker-react"
-import { ImageIcon, Smile, Send } from "lucide-react" // Added missing Smile and Send icons
+import { ImageIcon, Smile, Send } from "lucide-react" 
 import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
 
@@ -13,7 +13,6 @@ const EmojiPicker = dynamic(
     }
 )
 
-// Defined TypeScript interface for props
 interface ChatInputProps {
     onSendMessage: (e: React.FormEvent) => void;
     message: string;
@@ -24,7 +23,7 @@ const ChatInput = ({
     onSendMessage,
     message,
     setMessage,
-}: ChatInputProps) => { // Fixed empty type definition
+}: ChatInputProps) => { 
     const [showEmoji, setShowEmoji] = useState(false)
 
     const handleEmojiClick = (emojiData: any) => {
@@ -32,7 +31,6 @@ const ChatInput = ({
         setShowEmoji(false)
     }
 
-    // Fixed typo: HMTLInputElement -> HTMLInputElement
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
@@ -40,7 +38,6 @@ const ChatInput = ({
         }
     }
 
-    // Moved the return statement back INSIDE the component function body
     return (
         <form
             onSubmit={onSendMessage}
@@ -68,7 +65,6 @@ const ChatInput = ({
                 </button>
                 {showEmoji && (
                     <div className="absolute bottom-12 left-0 z-50">
-                        {/* Fixed typo: onEmohiClick -> onEmojiClick */}
                         <EmojiPicker onEmojiClick={handleEmojiClick} />
                     </div>
                 )}
