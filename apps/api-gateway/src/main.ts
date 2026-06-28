@@ -43,12 +43,13 @@ app.use("/admin", proxy("http://localhost:6005", {
   proxyReqPathResolver: (req) => req.originalUrl.replace("/admin", ""),
   proxyReqOptDecorator: forwardCookies  
 }))
-app.use("/chatting", proxy("http://localhost:6006", {
-  proxyReqPathResolver: (req) => req.originalUrl.replace("/chatting", ""),
-  proxyReqOptDecorator: forwardCookies  
-}))
+app.use("/chatting", proxy("http://localhost:6006"))
 app.use("/seller", proxy("http://localhost:6007", {
   proxyReqPathResolver: (req) => req.originalUrl.replace("/seller", ""),
+  proxyReqOptDecorator: forwardCookies  
+}))
+app.use("/recommendation", proxy("http://localhost:6009", {
+  proxyReqPathResolver: (req) => req.originalUrl.replace("/recommendation", ""),
   proxyReqOptDecorator: forwardCookies  
 }))
 

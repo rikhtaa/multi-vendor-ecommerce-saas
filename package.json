@@ -9,7 +9,8 @@
     "product-docs": "node apps/product-service/src/swagger.js",
     "user-ui": "npx nx run-many --target=dev --all --projects=user-ui",
     "seller-ui": "npx nx run-many --target=dev --all --projects=seller-ui",
-    "admin-ui": "npx nx run-many --target=dev --all --projects=admin-ui"
+    "admin-ui": "npx nx run-many --target=dev --all --projects=admin-ui",
+    "chatting-service": "npx nx run-many --target=dev --all --projects=chatting-service"
   },
   "private": true,
   "dependencies": {
@@ -18,6 +19,7 @@
     "@stripe/stripe-js": "^9.7.0",
     "@tanstack/react-query": "^5.100.10",
     "@tanstack/react-table": "^8.21.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "@upstash/redis": "^1.38.0",
     "apexcharts": "^5.14.0",
     "axios": "^1.16.0",

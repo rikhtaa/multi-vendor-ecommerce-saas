@@ -2,65 +2,62 @@
   "name": "@eshop/recommendation-service",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "nx serve recommendation-service"
+  },
   "nx": {
+    "name": "recommendation-service",
+    "projectType": "application",
+    "sourceRoot": "apps/recommendation-service/src",
     "targets": {
-      "prune-lockfile": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "executor": "@nx/js:prune-lockfile",
-        "outputs": [
-          "{workspaceRoot}/apps/recommendation-service/dist/package.json",
-          "{workspaceRoot}/apps/recommendation-service/dist/package-lock.json"
-        ],
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "defaultConfiguration": "development",
         "options": {
-          "buildTarget": "build"
+          "target": "node",
+          "outputPath": "out-tsc/recommendation-service",
+          "main": "apps/recommendation-service/src/main.ts",
+          "tsConfig": "apps/recommendation-service/tsconfig.app.json",
+          "webpackConfig": "apps/recommendation-service/webpack.config.js",
+          "assets": [
+            {
+              "glob": "swagger-output.json",
+              "input": "apps/recommendation-service/src",
+              "output": "."
+            }
+          ]
+        },
+        "configurations": {
+          "development": {
+            "mode": "development"
+          },
+          "production": {
+            "mode": "production"
+          }
         }
-      },
-      "copy-workspace-modules": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "outputs": [
-          "{workspaceRoot}/apps/recommendation-service/dist/workspace_modules"
-        ],
-        "executor": "@nx/js:copy-workspace-modules",
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "prune": {
-        "dependsOn": [
-          "prune-lockfile",
-          "copy-workspace-modules"
-        ],
-        "executor": "nx:noop"
       },
       "serve": {
-        "continuous": true,
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
-        "dependsOn": [
-          "build"
-        ],
+        "dependsOn": ["build"],
         "options": {
-          "buildTarget": "@eshop/recommendation-service:build",
+          "buildTarget": "recommendation-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@eshop/recommendation-service:build:development"
+            "buildTarget": "recommendation-service:build:development"
           },
           "production": {
-            "buildTarget": "@eshop/recommendation-service:build:production"
+            "buildTarget": "recommendation-service:build:production"
           }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
         }
       }
     }
-  },
-  "dependencies": {
-    "express": "^4.21.2"
   }
 }

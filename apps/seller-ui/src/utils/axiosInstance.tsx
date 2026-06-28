@@ -1,71 +1,111 @@
-import axios from "axios";
+import axios, {
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from "axios";
+
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+  skipAuthRedirect?: boolean;
+}
 
 const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_SERVER_URI,
-    withCredentials: true
-})
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URI,
+  withCredentials: true,
+});
 
-let isRefreshing = false
-let refreshSubscribers:(() => void)[] = []
+let isRefreshing = false;
+let refreshSubscribers: (() => void)[] = [];
 
-//Handle logout and prevent infinite loops
+const PUBLIC_AUTH_PAGES = [
+  "/login",
+  "/signup",
+  "/verify-otp",
+  "/forgot-password",
+  "/reset-password",
+];
+
 const handleLogout = () => {
-  if(window.location.pathname !== "/login"){
-    window.location.href = "/login"
+  const currentPath = window.location.pathname;
+
+  if (!PUBLIC_AUTH_PAGES.includes(currentPath)) {
+    window.location.href = "/login";
   }
-}
+};
 
-//handle adding a new access token to queued requests
 const subscribeTokenRefresh = (callback: () => void) => {
-    refreshSubscribers.push(callback)
-}
+  refreshSubscribers.push(callback);
+};
 
-// Execute queued requests after refresh
 const onRefreshSuccess = () => {
-    refreshSubscribers.forEach((callback) => callback())
-    refreshSubscribers = []
-}
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+};
 
-//Handle API requests
 axiosInstance.interceptors.request.use(
-    (config) => config,
-    (error) => Promise.reject(error)
-)
+  (config) => config,
+  (error) => Promise.reject(error)
+);
 
-//Handle expired tokens and refresh logic
 axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest =
+      error.config as CustomAxiosRequestConfig | undefined;
 
-        // prevent infinite retry loop
-        if(error.response?.status === 401 && !originalRequest._retry){
-            if(isRefreshing){
-                return new Promise((resolve)  => {
-                    subscribeTokenRefresh(() => resolve(axiosInstance(originalRequest)))
-                })
-            }
-            originalRequest._retry = true
-            isRefreshing = true
-            try {
-                await axios.post(
-                    `${process.env.NEXT_PUBLIC_SERVER_URI}/auth/api/refresh-token`,
-                    {},
-                    { withCredentials: true}
-                )
-                isRefreshing = false
-                onRefreshSuccess()
-
-                return axiosInstance(originalRequest)
-            } catch (error) {
-                isRefreshing = false
-                refreshSubscribers = []
-                handleLogout()
-                return Promise.reject(error)
-            }
-        }
-        return Promise.reject(error)
+    if (!originalRequest) {
+      return Promise.reject(error);
     }
-)
 
-export default axiosInstance
+    const isUnauthorized = error.response?.status === 401;
+
+    const shouldSkipRedirect =
+      originalRequest.skipAuthRedirect === true;
+
+    const isRefreshRequest =
+      originalRequest.url?.includes("/refresh-token");
+
+    if (
+      !isUnauthorized ||
+      originalRequest._retry ||
+      shouldSkipRedirect ||
+      isRefreshRequest
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        subscribeTokenRefresh(() =>
+          resolve(axiosInstance(originalRequest))
+        );
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URI}/auth/api/refresh-token`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      isRefreshing = false;
+      onRefreshSuccess();
+
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      isRefreshing = false;
+      refreshSubscribers = [];
+
+      handleLogout();
+
+      return Promise.reject(refreshError);
+    }
+  }
+);
+
+export default axiosInstance;
