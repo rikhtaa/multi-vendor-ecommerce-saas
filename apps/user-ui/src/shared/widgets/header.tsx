@@ -24,7 +24,7 @@ const Header = () => {
            <Image
               src={
                 layout?.logo ||
-                "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                "https://ik.imagekit.io/rikhtamenahil/logo.png?updatedAt=1781511542896"
               }
               width={200}
               height={100}

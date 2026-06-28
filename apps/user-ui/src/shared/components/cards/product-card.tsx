@@ -59,7 +59,7 @@ const ProductCard = ({ product, isEvent }: { product: any, isEvent?: boolean }) 
 
             <Link href={`/product/${product?.slug}`}>
                 <img
-                    src={product?.images[0]?.url || "https://images.unsplash.com/photo-1736173155811-e8142fd553ee?q=80&w=687&auto=format&fit=crop"}
+                    src={product?.images[0]?.url || "https://ik.imagekit.io/rikhtamenahil/bright-background-modern-yellow-smart-watch-with-blank-black-screen-is-isolated-generative-ai_1219132-53556.avif?updatedAt=1781514684891"}
                     alt={product?.title}
                     width={300}
                     height={300}

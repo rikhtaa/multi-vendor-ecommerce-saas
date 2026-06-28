@@ -48,29 +48,40 @@ const Page = () => {
     }
 
     const fetchFilteredProducts = async () => {
-        setIsProductLoading(true)
-        try {
-            const query = new URLSearchParams()
-            query.set("priceRange", priceRange.join(","))
-            if (selectedCategories.length > 0)
-                query.set("categories", selectedCategories.join(","))
-            if (selectedColors.length > 0) {
-                query.set("colors", selectedColors.join(","))
-                if (selectedSizes.length > 0)
-                    query.set("sizes", selectedSizes.join(","))
-                query.set("page", page.toString())
-                query.set("limit", "12")
+    setIsProductLoading(true)
 
-                const res = await axiosInstance.get(`/product/api/get-filtered-product?${query.toString()}`)
-                setProducts(res.data.products)
-                setTotalPages(res.data.pagination.totalPages)
-            }
-        } catch (error) {
-            console.error("Error fetching filtered products:", error)
-        } finally {
-            setIsProductLoading(false)
-        }
+    try {
+        const query = new URLSearchParams()
+
+        query.set("priceRange", priceRange.join(","))
+
+        if (selectedCategories.length > 0)
+            query.set("categories", selectedCategories.join(","))
+
+        if (selectedColors.length > 0)
+            query.set("colors", selectedColors.join(","))
+
+        if (selectedSizes.length > 0)
+            query.set("sizes", selectedSizes.join(","))
+
+        query.set("page", page.toString())
+        query.set("limit", "12")
+
+        const res = await axiosInstance.get(
+            `/product/api/get-filtered-product?${query.toString()}`
+        )
+
+        console.log(res.data)
+
+        setProducts(res.data.products || [])
+        setTotalPages(res.data.pagination?.totalPages || 1)
+
+    } catch (error) {
+        console.error("Error fetching filtered products:", error)
+    } finally {
+        setIsProductLoading(false)
     }
+}
 
     useEffect(() => {
         updateURL()
@@ -266,7 +277,7 @@ const Page = () => {
                                 ))}
                             </div>
                         ) : products.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid gap-6">
                                 {products.map((product) => (
                                     <ProductCard key={product.id} product={product} />
                                 ))}

@@ -31,15 +31,21 @@ const SellerProfile = ({
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ["seller-products"],
-    queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/seller/api/get-seller-products/${shop?.id}?page=1&limit=10`
-      );
-      return res.data.products;
-    },
-    staleTime: 1000 * 60 * 5,
-  });
+  queryKey: ["seller-products"],
+  queryFn: async () => {
+  console.log("QUERY RUNNING", shop?.id);
+
+  const url = `/seller/api/get-seller-products/${shop?.id}?page=1&limit=10`;
+  console.log("REQUEST URL", url);
+
+  const res = await axiosInstance.get(url);
+
+  console.log("FULL RESPONSE", res.data);
+  console.log("PRODUCTS", res.data.products);
+
+  return res.data.products;
+},
+});
 
   useEffect(() => {
     const fetchFollowStatus = async () => {
@@ -110,7 +116,6 @@ const SellerProfile = ({
     }
   }, [location, deviceInfo, isLoading]);
 
-  // build small gallery thumbnails from first products (fallback)
   const galleryImages: string[] =
     products?.slice(0, 3).map((p: any) => p?.images?.[0]?.url).filter(Boolean) || [];
 

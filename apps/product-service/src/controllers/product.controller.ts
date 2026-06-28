@@ -623,23 +623,23 @@ export const getFilteredEvents = async (req: Request, res: Response, next: NextF
       }
     }
 
-    const [products, total] = await Promise.all([
-      prisma.products.findMany({
+    const [events, total] = await Promise.all([
+      prisma.events.findMany({
         where: filters,
         skip,
         take: parsedLimit,
         include: {
           images: true,
-          Shop: true,
+          shop: true,
         },
       }),
-      prisma.products.count({ where: filters }),
+      prisma.events.count({ where: filters }),
     ])
 
     const totalPages = Math.ceil(total / parsedLimit)
 
     return res.status(200).json({
-      products,
+      events,
       pagination: {
         total,
         page: parsedPage,
@@ -674,11 +674,17 @@ export const getFilteredShops = async (req: Request, res: Response, next: NextFu
       }
     }
 
-    if (countries && (countries as string[]).length > 0) {
-      filters.countries = {
-        in: Array.isArray(countries) ? countries : [countries]
-      }
+    if (countries) {
+  filters.sellers = {
+  is: {
+    country: {
+      in: Array.isArray(countries)
+        ? countries
+        : (countries as string).split(",")
     }
+  }
+}
+}
 
     const [shops, total] = await Promise.all([
       prisma.shops.findMany({

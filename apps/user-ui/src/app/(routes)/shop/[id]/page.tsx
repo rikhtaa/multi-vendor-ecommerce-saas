@@ -29,7 +29,7 @@ export async function generateMetadata({
             type: "website",
             images: [
                 {
-                    url: data?.shop?.avatar || "/default-shop.png",
+                    url: data?.shop?.avatar || "https://plus.unsplash.com/premium_vector-1682269284255-8209b981c625?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                     width: 800,
                     height: 600,
                     alt: data?.shop?.name || "Shop Logo",
@@ -42,7 +42,7 @@ export async function generateMetadata({
             description:
                 data?.shop?.bio ||
                 "Explore products and services from trusted sellers on Eshop.",
-            images: [data?.shop?.avatar || "/default-shop.png"],
+            images: [data?.shop?.avatar || "https://plus.unsplash.com/premium_vector-1682269284255-8209b981c625?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"],
         }
     }
 }

@@ -51,7 +51,7 @@ const Page = () => {
     useEffect(() => {
         updateURL()
         fetchFilteredShops()
-    }, [selectedCategories, page])
+    }, [selectedCategories,selectedCountries, page])
 
     const toggleCategory = (category: string) => {
         setSelectedCategories((prev) =>

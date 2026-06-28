@@ -30,7 +30,7 @@ const Page = () => {
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
     const [selectedColors, setSelectedColors] = useState<string[]>([]);
     const [page, setPage] = useState(1);
-    const [products, setProducts] = useState<any[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [tempPriceRange, setTempPriceRange] = useState([0, 1199]);
 
@@ -48,29 +48,38 @@ const Page = () => {
     }
 
     const fetchFilteredProducts = async () => {
-        setIsProductLoading(true)
-        try {
-            const query = new URLSearchParams()
-            query.set("priceRange", priceRange.join(","))
-            if (selectedCategories.length > 0)
-                query.set("categories", selectedCategories.join(","))
-            if (selectedColors.length > 0) {
-                query.set("colors", selectedColors.join(","))
-                if (selectedSizes.length > 0)
-                    query.set("sizes", selectedSizes.join(","))
-                query.set("page", page.toString())
-                query.set("limit", "12")
+    setIsProductLoading(true)
 
-                const res = await axiosInstance.get(`/product/api/get-filtered-offers?${query.toString()}`)
-                setProducts(res.data.products)
-                setTotalPages(res.data.pagination.totalPages)
-            }
-        } catch (error) {
-            console.error("Error fetching filtered products:", error)
-        } finally {
-            setIsProductLoading(false)
-        }
+    try {
+        const query = new URLSearchParams()
+
+        query.set("priceRange", priceRange.join(","))
+
+        if (selectedCategories.length > 0)
+            query.set("categories", selectedCategories.join(","))
+
+        if (selectedColors.length > 0)
+            query.set("colors", selectedColors.join(","))
+
+        if (selectedSizes.length > 0)
+            query.set("sizes", selectedSizes.join(","))
+
+        query.set("page", page.toString())
+        query.set("limit", "12")
+
+        const res = await axiosInstance.get(
+            `/product/api/get-filtered-offers?${query.toString()}`
+        )
+
+        setEvents(res.data.events || [])
+        setTotalPages(res.data.pagination?.totalPages || 1)
+
+    } catch (error) {
+        console.error("Error fetching filtered events:", error)
+    } finally {
+        setIsProductLoading(false)
     }
+}
 
     useEffect(() => {
         updateURL()
@@ -241,7 +250,7 @@ const Page = () => {
                                     <label className="flex items-center gap-3 text-sm cursor-pointer text-gray-700">
                                         <input
                                             type="checkbox"
-                                            checked={selectedColors.includes(size)}
+                                            checked={selectedSizes.includes(size)}
                                             onChange={() => toggleSize(size)}
                                             className="accent-blue-600"
                                         />
@@ -253,7 +262,7 @@ const Page = () => {
                         </ul>
                     </aside>
 
-                    {/* product grid */}
+                    {/* event grid */}
                     <div className="flex-1 px-2 lg:px-3">
                         {isProductLoading ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl ">
@@ -265,14 +274,14 @@ const Page = () => {
                                     </div>
                                 ))}
                             </div>
-                        ) : products.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-3 2xl:grid">
-                                {products.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
+                        ) : events.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {events.map((event) => (
+                                    <ProductCard key={event.id} product={event} />
                                 ))}
                             </div>
                         ) : (
-                            <p>No Products found!</p>
+                            <p>No Events found!</p>
                         )}
 
                         {totalPages > 1 && (
