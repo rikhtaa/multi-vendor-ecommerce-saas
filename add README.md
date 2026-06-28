@@ -1,38 +1,38 @@
-# 🛍️ EShop — Multi-Vendor E-Commerce SaaS
+#  EShop  Multi-Vendor E-Commerce SaaS
 
-A production-ready **multi-vendor e-commerce platform** built with a **Microservice Architecture** inside an **Nx monorepo**. Sellers get their own storefront, buyers get a seamless shopping experience, and admins get full control — all powered by real-time communication, AI-driven recommendations, and ImageKit-based media management.
+A production-ready **multi-vendor e-commerce platform** built with a **Microservice Architecture** inside an **Nx monorepo**. Sellers get their own storefront, buyers get a seamless shopping experience, and admins get full control  all powered by real-time communication, AI-driven recommendations, and ImageKit-based media management.
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 .
-├── apps/
-│   ├── admin-service/          # Admin REST API (NestJS/Express)
-│   ├── admin-ui/               # Admin dashboard (Next.js)
-│   ├── api-gateway/            # Unified API gateway with rate limiting & proxying
-│   ├── auth-service/           # Authentication & authorization (JWT + cookies)
-│   ├── chatting-service/       # Real-time chat via WebSocket (port 6006)
-│   ├── kafka-service/          # Kafka event consumer/producer bridge
-│   ├── logger-service/         # Centralized logging service
-│   ├── order-service/          # Order lifecycle management
-│   ├── product-service/        # Product catalog, inventory, and search
-│   ├── recommendation-service/ # AI-powered product recommendations (TensorFlow.js)
-│   ├── seller-service/         # Seller onboarding, dashboard, and management
-│   ├── seller-ui/              # Seller-facing frontend (Next.js)
-│   └── user-ui/                # Buyer-facing storefront (Next.js)
-├── packages/                   # Shared libraries
-├── prisma/                     # Prisma schema & migrations (MongoDB)
-├── generated/                  # Auto-generated Prisma client
-├── nx.json
-├── package.json
-└── tsconfig.base.json
+ apps/
+�    admin-service/          # Admin REST API (NestJS/Express)
+�    admin-ui/               # Admin dashboard (Next.js)
+�    api-gateway/            # Unified API gateway with rate limiting & proxying
+�    auth-service/           # Authentication & authorization (JWT + cookies)
+�    chatting-service/       # Real-time chat via WebSocket (port 6006)
+�    kafka-service/          # Kafka event consumer/producer bridge
+�    logger-service/         # Centralized logging service
+�    order-service/          # Order lifecycle management
+�    product-service/        # Product catalog, inventory, and search
+�    recommendation-service/ # AI-powered product recommendations (TensorFlow.js)
+�    seller-service/         # Seller onboarding, dashboard, and management
+�    seller-ui/              # Seller-facing frontend (Next.js)
+�    user-ui/                # Buyer-facing storefront (Next.js)
+ packages/                   # Shared libraries
+ prisma/                     # Prisma schema & migrations (MongoDB)
+ generated/                  # Auto-generated Prisma client
+ nx.json
+ package.json
+ tsconfig.base.json
 ```
 
 ---
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 EShop follows a **microservice architecture** where each service is independently deployable and communicates via:
 
@@ -42,22 +42,22 @@ EShop follows a **microservice architecture** where each service is independentl
 
 ```
 User / Seller / Admin
-        │
+        �
    [API Gateway :8080]
-        │
-   ┌────┴──────────────────────────────┐
-   │                                   │
+        �
+   �
+   �                                   �
 [auth-service]   [product-service]   [order-service]
 [seller-service] [admin-service]     [recommendation-service]
-        │
-   [kafka-service] ──► [logger-service]
-        │
+        �
+   [kafka-service] � [logger-service]
+        �
    [chatting-service :6006 / :6008]
 ```
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -83,7 +83,7 @@ User / Seller / Admin
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -106,7 +106,7 @@ pnpm install
 
 ---
 
-## 🔐 Environment Variables
+##  Environment Variables
 
 ### Root `.env`
 
@@ -170,7 +170,7 @@ NEXT_PUBLIC_CHATTING_WEBSOCKET_URI="ws://localhost:6006"
 
 ---
 
-## 🧑‍💻 Development
+##  Development
 
 ### Run Everything at Once
 
@@ -209,19 +209,19 @@ pnpm product-docs
 
 ---
 
-## 🌐 Service Ports
+##  Service Ports
 
 | Service | Port |
 |---|---|
 | API Gateway | 8080 |
 | User UI | 3000 |
 | Seller UI / Seller Service | 3001 |
-| Chatting Service (buyer↔seller) | 6006 |
+| Chatting Service (buyer�seller) | 6006 |
 | Chatting Service (admin) | 6008 |
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 **User Storefront**
 - Browse products by category, filter by price range
@@ -252,7 +252,7 @@ pnpm product-docs
 
 ---
 
-## 📦 Build
+##  Build
 
 ```bash
 # Build all apps and packages
@@ -265,7 +265,7 @@ npx nx build user-ui
 
 ---
 
-## 🔍 Linting & Type Checking
+##  Linting & Type Checking
 
 ```bash
 # Lint all
@@ -277,7 +277,7 @@ npx nx run-many --target=typecheck --all
 
 ---
 
-## 📖 API Docs
+##  API Docs
 
 Swagger UI is available after running the relevant service:
 
@@ -293,12 +293,12 @@ pnpm product-docs
 
 ---
 
-## 🖼️ Media Management
+##  Media Management
 
 All product and seller images are managed via **ImageKit**. Configure your ImageKit public and private keys in the root `.env`. The `imagekit` Node.js SDK is used server-side for signed uploads, and the ImageKit CDN handles delivery and transformations.
 
 ---
 
-## 📜 License
+##  License
 
-MIT — see [LICENSE](./LICENSE) for details.
+MIT  see [LICENSE](./LICENSE) for details.
