@@ -149,7 +149,7 @@ const CreateShop = ({
                 >
                     {/* {signupMutation.isPending ? "Signing up..." : "Signup"} */}
                     Create 
-                    <StripeLogo/>
+                    {/* <StripeLogo/> */}
                 </button>
 
             </form>

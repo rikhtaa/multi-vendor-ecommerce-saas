@@ -120,8 +120,8 @@ export const uploadImage = async (
     next: NextFunction
 ) => {
     try {
-        const { file, fileName, folder } = req.body
-        if (!file || !fileName || !folder) {
+        const { fileName } = req.body
+        if (!fileName) {
             return res
                 .status(400)
                 .json({ success: false, message: "Missing required fields." })
@@ -129,9 +129,9 @@ export const uploadImage = async (
 
         //Upload image to ImageKit
         const uploadResponse = await imagekit.upload({
-            file,
-            fileName,
-            folder
+            file: fileName,
+            fileName: `updated-${Date.now()}.jpg`,
+            folder: "/"
         })
 
 
@@ -290,8 +290,8 @@ export const getSellerProducts = async (
         const [products, total] = await Promise.all([
             prisma.products.findMany({
                 where: {
-                    starting_data: null,
-                    shopId: req.query.id!,
+                    starting_date: null,
+                    shopId: req.params.id!,
                 },
                 skip,
                 take: limit,
@@ -307,7 +307,7 @@ export const getSellerProducts = async (
             prisma.products.count({
                 where: {
                     starting_date: null,
-                    shopId: req.query.id!,
+                    shopId: req.params.id!,
                 },
             }),
         ])
@@ -341,10 +341,10 @@ export const getSellerEvents = async (
         const [products, total] = await Promise.all([
             prisma.products.findMany({
                 where: {
-                    starting_data: {
+                    starting_date: {
                         not: null,
                     },
-                    shopId: req.query.id!,
+                    shopId: req.params.id!,
                 },
                 skip,
                 take: limit,
@@ -358,7 +358,7 @@ export const getSellerEvents = async (
             prisma.products.count({
                 where: {
                     starting_date: null,
-                    shopId: req.query.id!,
+                    shopId: req.params.id!,
                 },
             }),
         ])

@@ -27,7 +27,9 @@ const ProvidersWithWebSocket = ({
 
   if(isLoading) return null
   return (
-    <>{seller && <WebSocketProvider seller={seller}>{children}</WebSocketProvider>}
+    <>{seller &&( 
+    <WebSocketProvider seller={seller}>{children}</WebSocketProvider>
+    )}
     {!seller && children}
     </>
   )

@@ -2,11 +2,17 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Pencil, Star, Users, Clock, MapPin, Globe, Calendar } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import useSeller from '../hooks/useSeller';
 import Link from 'next/link';
+import axios, { AxiosError } from 'axios';
+
+interface UploadImage {
+    fileId: string
+    file_url: string
+}
 
 const TABS = ["Products", "Offers", "Reviews"];
 
@@ -25,6 +31,9 @@ const SellerProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeTab, setActiveTab] = useState("Products");
   const router = useRouter();
+  const queryClient = useQueryClient()
+
+
 
   const { data: products = [] } = useQuery({
     queryKey: ["shop-products"],
@@ -40,6 +49,44 @@ const SellerProfile = () => {
 
   const activeItems = activeTab === "Products" ? products : activeTab === "Offers" ? events : [];
 
+
+      const convertFileToBase64 = (file: File) => {
+          return new Promise((resolve, reject) => {
+              const reader = new FileReader()
+              reader.readAsDataURL(file)
+              reader.onload = () => resolve(reader.result)
+              reader.onerror = (error) => reject(error)
+          })
+      }
+
+      const { mutate: updateCoverImage } = useMutation({
+      mutationFn: async (imageUrl: string) => {  
+        return await axiosInstance.put("/seller/api/update-image", {
+            editType: "cover",
+            imageUrl,
+        })
+    },
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["seller"] })
+    },
+    onError: (err) => {
+        console.error("Image update failed", err)
+    }
+})
+
+const handleImageChange = async (file: File | null, index: number) => {
+    if (!file) return
+    try {
+        const fileName = await convertFileToBase64(file)
+        
+        const response = await axiosInstance.post("/seller/api/upload-image", { fileName })
+        const imageUrl = response.data.url
+        
+        updateCoverImage(imageUrl) 
+    } catch (error) {
+        console.log(error)
+    }
+}
   if (isLoading) {
     return (
       <div className="w-full min-h-screen bg-gray-900 flex items-center justify-center text-white">
@@ -71,10 +118,24 @@ const SellerProfile = () => {
           className="object-cover"
         />
         {seller?.id && (
-          <button className="absolute top-3 right-3 bg-gray-800/80 hover:bg-gray-700 text-white px-3 py-2 rounded-md flex items-center gap-2 text-sm border border-gray-600 transition-all">
-            <Pencil size={14} /> Edit Cover
-          </button>
-        )}
+        <>
+        <label
+        htmlFor="imagePicker"
+        className="absolute top-3 right-3 bg-gray-800/80 hover:bg-gray-700 text-white px-3 py-2 rounded-md flex items-center gap-2 text-sm border border-gray-600 transition-all cursor-pointer"
+        >
+          <Pencil size={14} /> Edit Cover
+        </label>
+        <input
+          id="imagePicker"
+          type="file"
+          className="hidden"
+          onChange={(e) =>{
+            const file = e.target.files?.[0] 
+           handleImageChange(file, 1)
+          }}
+        />
+       </>
+      )}
       </div>
 
       {/* Main Content */}
@@ -109,7 +170,7 @@ const SellerProfile = () => {
                 </div>
                 {seller?.id ? (
                   <button
-                    onClick={() => router.push("/edit-profile")}
+                    onClick={() => router.push("/dashboard/edit-profile")}
                     className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 transition-all text-sm whitespace-nowrap"
                   >
                     <Pencil size={15} /> Edit Profile
