@@ -31,7 +31,7 @@ export const recommendProducts = async(userId:string,allProducts:any):Promise<st
     const userActions:UserAction[] = await fetchUserActivity(userId)
     if(userActions.length === 0)  return []
 
-    const processData = preProcessData(userActions,allProducts)
+    const processData = preProcessData(userId,userActions,allProducts)
     if(!processData || !processData.interactions || !processData.products)
         return []
 
