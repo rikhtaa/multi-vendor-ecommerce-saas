@@ -2,7 +2,7 @@ import React, { forwardRef } from "react"
 
 interface BaseProps {
     label?: string
-    type?: "text" | "number" | "password" | "email" | "textarea"
+    type?: "text" | "number" | "password" | "email" | "textarea" | "date"
     className?: string
 }
 
@@ -33,7 +33,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
                     <input
                     type={type}
                     ref={ref as React.Ref<HTMLInputElement>}
-                    className={`w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white ${className}`}
+                        className={`w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white [color-scheme:dark] ${className}`}
                     {...(props as InputProps)}
                     />
                 )}

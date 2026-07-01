@@ -1,39 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../utils/axiosInstance";
-import { useAuthStore } from "../store/authStore";
 import { isProtected } from "../utils/protected";
 
-
-//fetch user data from API
-const fetchUser = async (isLoggedIn: boolean) => {
-    const config = isLoggedIn ? isProtected : {}
-    const response = await axiosInstance.get("/api/logged-in-user", config)
-    return response.data.user
-}
+const fetchUser = async () => {
+    try {
+        const response = await axiosInstance.get(
+            "/api/logged-in-user",
+            isProtected
+        );
+        return response.data.user ?? null;
+    } catch {
+        return null;
+    }
+};
 
 const useUser = () => {
-    const {setLoggedIn, isLoggedIn} = useAuthStore()
-    const {
-        data:user,
-        isPending,
-        isError,
-    } = useQuery({
+    const query = useQuery({
         queryKey: ["user"],
-        queryFn: ()  => fetchUser(isLoggedIn),
+        queryFn: fetchUser,
         staleTime: 1000 * 60 * 5,
         retry: false,
-        // @ts-ignore
-        onSuccess: () => {
-            setLoggedIn(true)
-        },
-        onError: () => {
-            setLoggedIn(false)
-        },
-        refetchOnMount: false,     
-        refetchOnWindowFocus: false 
-    })
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+    });
 
-    return {user: user as any, isLoading:isPending, isError}
-}
+    return {
+        user: query.data,
+        isLoading: query.isPending,
+        isError: query.isError,
+    };
+};
 
-export default useUser
+export default useUser;

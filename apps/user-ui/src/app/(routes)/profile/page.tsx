@@ -49,11 +49,13 @@ const Page = () => {
     }, [activeTab])
 
     const logOutHandler = async () => {
-        await axiosInstance.get("/api/logout-user").then((res) => {
-            queryClient.invalidateQueries({ queryKey: ["user"] })
-
+        try {
+            await axiosInstance.post("/api/logout-user")
+            queryClient.removeQueries({ queryKey: ["user"] })
             router.push("/login")
-        })
+        } catch (error) {
+            console.error("Logout failed:", error)
+        }
     }
 
     const { data: notifications, isLoading: notificationsLoading } = useQuery({
@@ -64,7 +66,7 @@ const Page = () => {
         }
     })
 
-     const markAsRead = async (notificationId: string) => {
+    const markAsRead = async (notificationId: string) => {
         await axiosInstance.post("/seller/api/mark-notification-as-read", {
             notificationId
         })
@@ -187,38 +189,38 @@ const Page = () => {
                         ) : activeTab === "Change Password" ? (
                             <ChangePassword />
                         ) : activeTab === "Notifications" ? (
-                                <div className="space-y-4 text-sm text-gray-700">
-                                    {!notificationsLoading && notifications?.length === 0 && (
-                                        <p>No Notifications available yet!</p>
-                                    )}
+                            <div className="space-y-4 text-sm text-gray-700">
+                                {!notificationsLoading && notifications?.length === 0 && (
+                                    <p>No Notifications available yet!</p>
+                                )}
 
-                                    <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
-                                        {notifications.map((d: any) => (
-                                            <Link
-                                                key={d.id}
-                                                href={d.redirect_link}
-                                                className={`block px-5 py-4 transition ${d.status === "Unread"
-                                                        ? "hover:bg-gray-800/40"
-                                                        : "bg-gray-800/50 hover:bg-gray-800/70"
-                                                    }`}
-                                                onClick={() => markAsRead(d.id)}
-                                            >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-white font-medium">{d.title}</span>
-                                                        <span className="text-gray-300 text-sm">{d.message}</span>
-                                                        <span className="text-gray-500 text-xm mt-1">
-                                                            {new Date(d.createdAt).toLocaleString("en-UK", {
-                                                                dateStyle: "medium"
-                                                            })}
-                                                        </span>
-                                                    </div>
+                                <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
+                                    {notifications.map((d: any) => (
+                                        <Link
+                                            key={d.id}
+                                            href={d.redirect_link}
+                                            className={`block px-5 py-4 transition ${d.status === "Unread"
+                                                ? "hover:bg-gray-800/40"
+                                                : "bg-gray-800/50 hover:bg-gray-800/70"
+                                                }`}
+                                            onClick={() => markAsRead(d.id)}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex flex-col">
+                                                    <span className="text-white font-medium">{d.title}</span>
+                                                    <span className="text-gray-300 text-sm">{d.message}</span>
+                                                    <span className="text-gray-500 text-xm mt-1">
+                                                        {new Date(d.createdAt).toLocaleString("en-UK", {
+                                                            dateStyle: "medium"
+                                                        })}
+                                                    </span>
                                                 </div>
-                                            </Link>
-                                        ))}
-                                    </div>
+                                            </div>
+                                        </Link>
+                                    ))}
                                 </div>
-                            ) : (
+                            </div>
+                        ) : (
                             <p>Not Found</p>
                         )}
                     </div>

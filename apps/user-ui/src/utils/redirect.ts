@@ -1,5 +1,5 @@
 let redirectToLogin = () => {
-    window.location.href = "login"
+    window.location.href = "/login"
 }
 
 export const setRedirectHandler = (handler: () => void) => {

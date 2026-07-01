@@ -81,7 +81,7 @@ model shops {
   ratings        Float          @default(0)
   reviews        shopReviews[]
   followers      followers[]
-  sellerId       String         @unique @db.ObjectId
+  sellerId       String         @db.ObjectId
   sellers        sellers        @relation(fields: [sellerId], references: [id])
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -101,7 +101,7 @@ model sellers {
   country       String
   password      String
   stripeId      String?
-  shop          shops?
+  shop          shops[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   isDeleted     Boolean    @default(false)
@@ -265,7 +265,7 @@ model address {
 model notifications {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   creatorId     String    @db.ObjectId
-  receiverId    String    @db.ObjectId
+  receiverId    String   
   redirect_link String?
   title         String
   message       String?
@@ -306,7 +306,7 @@ model events {
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   shopId               String         @db.ObjectId
-  shop                 shops          @relation(fields: [shopId], references: [id])
+  Shop                 shops          @relation(fields: [shopId], references: [id])
 }
 
 model conversationGroup {

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { runRedirectToLogin } from "./redirect";
-import { resolve } from "node:dns";
 
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_SERVER_URI,

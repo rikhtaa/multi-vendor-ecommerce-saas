@@ -27,7 +27,7 @@ const ProvidersWithWebSocket = ({
 }) => {
   const {user, isLoading} = useUser()
 
-  if(isLoading) return null
+   if (isLoading) return <>{children}</>
 
   return (
     <>{user && 
