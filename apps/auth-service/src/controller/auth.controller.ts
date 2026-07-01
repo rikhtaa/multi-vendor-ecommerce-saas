@@ -4,7 +4,7 @@ import { AuthError, NotFoundError, validationError } from "@packages/error-handl
 import prisma from "@packages/libs/prisma";
 import bcrypt from "bcryptjs"
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
-import { setCookie } from "../utils/cookies/setCookie";
+import { clearCookie, setCookie } from "../utils/cookies/setCookie";
 import Stripe from "stripe"
 import { sendLog } from "@packages/utils/logs/send-logs";
 
@@ -134,7 +134,7 @@ export const refreshToken = async (
   try {
     const refreshToken =
       req.cookies["refresh_token"] ||
-      req.cookies["seler-refresh_token"] ||
+      req.cookies["seller_refresh_token"] ||
       req.headers.authorization?.split(" ")[1]
 
     if (!refreshToken) {
@@ -442,7 +442,7 @@ export const loginSeller = async (
     }
 
     res.clearCookie("seller-access-token")
-    res.clearCookie("seller-refresh-token")
+    res.clearCookie("seller_refresh_token")
 
     //Generate access and refresh token
     const accessToken = jwt.sign(
@@ -462,7 +462,7 @@ export const loginSeller = async (
     )
 
     // store the refresh and access token in an httOnly secure cookie 
-    setCookie(res, "seller-refresh-token", refreshToken)
+    setCookie(res, "seller_refresh_token", refreshToken)
     setCookie(res, "seller-access-token", accessToken)
 
     res.status(201).json({
@@ -493,10 +493,14 @@ export const logOutAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction) => {
-  res.clearCookie("access_token")
-  res.clearCookie("refresh_token")
+  try {
+    clearCookie(res, "access_token")
+    clearCookie(res, "refresh_token")
 
-  return res.status(201).json({ success: true })
+    return res.status(200).json({ success: true, message: "Logged out successfully!" })
+  } catch (error) {
+    return next(error)
+  }
 }
 
 // add new address
@@ -685,7 +689,7 @@ export const loginAdmin = async (req: any, res: Response, next: NextFunction) =>
         })
 
         res.clearCookie("seller-access-token")
-        res.clearCookie("seller-refresh-token")
+        res.clearCookie("seller_refresh_token")
 
         // Generate access and refresh token
         const accessToken = jwt.sign(
@@ -745,3 +749,32 @@ export const getLayoutData = async (req: Request, res: Response, next: NextFunct
     }
 }
 
+// log out user
+export const logOutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  try {
+    clearCookie(res, "access_token")
+    clearCookie(res, "refresh_token")
+
+    return res.status(200).json({ success: true, message: "Logged out successfully!" })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+// log out seller
+export const logOutSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  try {
+    clearCookie(res, "seller-access-token")
+    clearCookie(res, "seller_refresh_token")
+
+    return res.status(200).json({ success: true, message: "Logged out successfully!" })
+  } catch (error) {
+    return next(error)
+  }
+}
