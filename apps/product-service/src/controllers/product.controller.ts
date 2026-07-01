@@ -211,6 +211,18 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
       return next(new validationError("Slug already exists! Please use a different slug!"))
     }
 
+    const shop = await prisma.shops.findFirst({
+      where: {
+        sellerId: req.seller.id
+      }
+    })
+
+    if (!shop) {
+      return next(
+        new validationError("Shop not found")
+      )
+    }
+
     const newProduct = await prisma.products.create({
       data: {
         title,
@@ -219,7 +231,7 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
         warranty,
         cashOnDelivery: cash_on_delivery,
         slug,
-        shopId: req.seller?.shop?.id!,
+        shopId: shop.id,
         tags: Array.isArray(tags) ? tags : tags.split(","),
         brand,
         video_url,
@@ -675,16 +687,16 @@ export const getFilteredShops = async (req: Request, res: Response, next: NextFu
     }
 
     if (countries) {
-  filters.sellers = {
-  is: {
-    country: {
-      in: Array.isArray(countries)
-        ? countries
-        : (countries as string).split(",")
+      filters.sellers = {
+        is: {
+          country: {
+            in: Array.isArray(countries)
+              ? countries
+              : (countries as string).split(",")
+          }
+        }
+      }
     }
-  }
-}
-}
 
     const [shops, total] = await Promise.all([
       prisma.shops.findMany({
@@ -798,6 +810,124 @@ export const topShops = async (req: Request, res: Response, next: NextFunction) 
     const top10Shops = enrichedShops.sort((a, b) => b.totalSales - a.totalSales).slice(0, 10)
 
     return res.status(200).json({ shops: top10Shops })
+
+  } catch (error) {
+    return next(error)
+  }
+}
+
+//create event 
+export const createEvent = async (req: any, res: Response, next: NextFunction) => {
+  try {
+
+    const {
+      title,
+      short_description,
+      detailed_description,
+      warranty,
+      custom_specifications,
+      slug,
+      tags,
+      cash_on_delivery,
+      brand,
+      video_url,
+      category,
+      colors = [],
+      sizes = [],
+      discountCodes,
+      stock,
+      sale_price,
+      regular_price,
+      Subcategory,
+      custom_properties = {},
+      images = [],
+      starting_date,
+      ending_date,
+    } = req.body
+
+    if (!title ||
+      !slug ||
+      !short_description ||
+      !category ||
+      !Subcategory ||
+      !sale_price ||
+      !images ||
+      !tags ||
+      !stock ||
+      !regular_price ||
+      !stock ||
+      !starting_date ||
+      !ending_date
+    ) {
+      return next(new validationError("Missing required fields"))
+    }
+
+    if (!req.seller.id) {
+      return next(new AuthError("Only seller can create events!"))
+    }
+
+    const slugChecking = await prisma.events.findUnique({
+      where: {
+        slug,
+      }
+    })
+
+    if (slugChecking) {
+      return next(new validationError("Slug already exists! Please use a different slug!"))
+    }
+
+    const shop = await prisma.shops.findFirst({
+      where: {
+        sellerId: req.seller.id
+      }
+    })
+
+    if (!shop) {
+      return next(
+        new validationError("Shop not found")
+      )
+    }
+
+    const newEvent = await prisma.events.create({
+      data: {
+        title,
+        short_description,
+        detailed_description,
+        warranty,
+        cashOnDelivery: cash_on_delivery,
+        slug,
+        shopId: shop?.id!,
+        tags: Array.isArray(tags) ? tags : tags.split(","),
+        brand,
+        video_url,
+        category,
+        subCategory: Subcategory,
+        colors: colors || [],
+        discount_codes: discountCodes,
+        sizes: sizes || [],
+        stock: parseInt(stock),
+        sale_price: parseFloat(sale_price),
+        regular_price: parseFloat(regular_price),
+        custom_properties: custom_properties || {},
+        custom_specifications: custom_specifications || {},
+        starting_date: new Date(starting_date),
+        ending_date: new Date(ending_date),
+        images: {
+          create: images
+            .filter((img: any) => img && img.fileId && img.file_url)
+            .map((img: any) => ({
+              file_id: img.fileId,
+              url: img.file_url
+            }))
+        }
+      },
+      include: { images: true }
+    })
+
+    res.status(201).json({
+      success: true,
+      newEvent
+    })
 
   } catch (error) {
     return next(error)

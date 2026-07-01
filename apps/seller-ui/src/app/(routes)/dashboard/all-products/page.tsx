@@ -172,7 +172,7 @@ const ProductList = () => {
         <h2 className='text-2xl text-white font-semibold'>All Products</h2>
         <Link
           href="/dashboard/create-product"
-          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg'
+          className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2'
         >
           <Plus size={18} /> Add Product
         </Link>

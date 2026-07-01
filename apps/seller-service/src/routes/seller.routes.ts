@@ -16,6 +16,7 @@ router.get("/seller-notifications", isAuthenticated, isSeller, sellerNotificatio
 router.post("/follow-shop", isAuthenticated, followShop);
 router.post("/unfollow-shop", isAuthenticated, unFollowShop);
 router.get("/is-following/:id", isAuthenticated, isFollowing);
-router.post("/mark-notification-as-read", isAuthenticated, isAuthenticated, markNotificationAsRead);
+router.post("/mark-notification-as-read", isAuthenticated, markNotificationAsRead);
+router.get("/get-all-events", isAuthenticated, getSellerEvents)
 
 export default router;
