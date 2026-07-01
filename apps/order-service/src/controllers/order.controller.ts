@@ -180,7 +180,6 @@ export const verifyingPaymentSession = async (req: any, res: Response, next: Nex
 // create order
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
-
     const stripeSignature = req.headers["stripe-signature"]
     if (!stripeSignature) {
       return res.status(400).send("Missing Stripe signature")
@@ -201,63 +200,54 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     }
 
     if (event.type === "payment_intent.succeeded") {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      const sessionId = paymentIntent.metadata.sessionId;
-      const userId = paymentIntent.metadata.userId;
+      const paymentIntent = event.data.object as any
+      const sessionId = paymentIntent.metadata.sessionId
+      const userId = paymentIntent.metadata.userId
 
-      const sessionKey = `payment-session:${sessionId}`;
-      const sessionData = await redis.get(sessionKey);
+      const sessionKey = `payment-session:${sessionId}`
+      const sessionData = await redis.get(sessionKey)
 
       if (!sessionData) {
-        console.warn("Session data expired or missing for", sessionId);
-        return res
-          .status(200)
-          .send("No session found, skipping order creation");
+        console.warn("Session data expired or missing for", sessionId)
+        return res.status(200).send("No session found, skipping order creation")
       }
 
-      const { cart, totalAmount, shippingAddressId, coupon } =
-        JSON.parse(sessionData)
+      const session = typeof sessionData === "string"
+        ? JSON.parse(sessionData)
+        : sessionData
 
-      const user = await prisma.users.findUnique({ where: { id: userId } });
-      const name = user?.name!;
-      const email = user?.email!;
+      const { cart, totalAmount, shippingAddressId, coupon } = session
+
+      const user = await prisma.users.findUnique({ where: { id: userId } })
+      const name = user?.name!
+      const email = user?.email!
 
       const shopGrouped = cart.reduce((acc: any, item: any) => {
-        if (!acc[item.shopId]) acc[item.shopId] = [];
-        acc[item.shopId].push(item);
-        return acc;
-      }, {});
+        if (!acc[item.shopId]) acc[item.shopId] = []
+        acc[item.shopId].push(item)
+        return acc
+      }, {})
 
       for (const shopId in shopGrouped) {
-        const orderItems = shopGrouped.reduce(
-          (sum: number, p: any) => sum + p.quantity * p.sale_price,
-        )
+        const orderItems = shopGrouped[shopId]  
 
         let orderTotal = orderItems.reduce(
-          0
+          (sum: number, p: any) => sum + p.quantity * p.sale_price, 0  
         )
-        //Apply discount if applicable
-        if (
-          coupon &&
-          coupon.discountedProductId &&
-          orderItems.some((item: any) => item.id === coupon.discountedproductId)
-        ) {
+
+        if (coupon?.discountedProductId) {
           const discountedItem = orderItems.find(
             (item: any) => item.id === coupon.discountedProductId
           )
           if (discountedItem) {
             const discount =
               coupon.discountPercent > 0
-                ? (discountedItem.sale_price *
-                  discountedItem.quantity *
-                  coupon.discountPercent) /
-                100
+                ? (discountedItem.sale_price * discountedItem.quantity * coupon.discountPercent) / 100
                 : coupon.discountAmount
             orderTotal -= discount
           }
         }
 
-        //create order
         const order = await prisma.orders.create({
           data: {
             userId,
@@ -265,19 +255,18 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
             total: orderTotal,
             status: "Paid",
             shippingAddressId: shippingAddressId || null,
-            couponCode: coupon?.discountAmount || 0,
+            couponCode: coupon?.code || null,  
             items: {
               create: orderItems.map((item: any) => ({
                 productId: item.id,
                 quantity: item.quantity,
-                price: item.price,
-                selectedOptions: item.selectedOptions,
+                price: item.sale_price, 
+                selectedOptions: item.selectedOptions || null,
               }))
             }
           }
         })
 
-        //update product & analytics
         for (const item of orderItems) {
           const { id: productId, quantity } = item
 
@@ -291,28 +280,12 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
           await prisma.productAnalytics.upsert({
             where: { productId },
-            create: {
-              productId,
-              shopId,
-              purchases: quantity,
-              lastViewedAt: new Date()
-            },
-            update: {
-              purchases: { increment: quantity }
-            }
+            create: { productId, shopId, purchases: quantity, lastViewedAt: new Date() },
+            update: { purchases: { increment: quantity } }
           })
 
-          const existingAnalytics = await prisma.userAnalytics.findUnique({
-            where: { userId },
-          })
-
-          const newAction = {
-            productId,
-            shopId,
-            action: "purchase",
-            timestamp: Date.now()
-          }
-
+          const existingAnalytics = await prisma.userAnalytics.findUnique({ where: { userId } })
+          const newAction = { productId, shopId, action: "purchase", timestamp: Date.now() }
           const currentActions = Array.isArray(existingAnalytics?.actions)
             ? (existingAnalytics.actions as Prisma.JsonArray)
             : []
@@ -320,77 +293,58 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
           if (existingAnalytics) {
             await prisma.userAnalytics.update({
               where: { userId },
-              data: {
-                lastVisited: new Date(),
-                actions: [...currentActions, newAction],
-              },
+              data: { lastVisited: new Date(), actions: [...currentActions, newAction] }
             })
           } else {
             await prisma.userAnalytics.create({
-              data: {
-                userId,
-                lastVisited: new Date(),
-                actions: [newAction],
-              }
+              data: { userId, lastVisited: new Date(), actions: [newAction] }
             })
           }
         }
 
-        //send email for user
-        await sendEmail(
-          email,
-          " Your Eshop Order Confirmation",
-          "order-confirmation",
-          {
-            name,
-            cart,
-            totalAmount: coupon?.discountAmount
-              ? totalAmount - coupon?.discountAmount
-              : totalAmount,
-            trackingUrl: `/order/${order.id}`
-          }
-        )
+        await sendEmail(email, "Your Eshop Order Confirmation", "order-confirmation", {
+          name,
+          cart,
+          totalAmount: coupon?.discountAmount
+            ? totalAmount - coupon.discountAmount
+            : totalAmount,
+          trackingUrl: `/order/${order.id}`
+        })
 
-        // Create notifications for sellers
         const createdShopIds = Object.keys(shopGrouped)
         const sellerShops = await prisma.shops.findMany({
           where: { id: { in: createdShopIds } },
-          select: {
-            id: true,
-            sellerId: true,
-            name: true
-          }
+          select: { id: true, sellerId: true, name: true }
         })
 
         for (const shop of sellerShops) {
-          const firstProduct = shopGrouped[shop.id][0];
-          const productTitle = firstProduct?.title || "new item";
-
+          const firstProduct = shopGrouped[shop.id]?.[0]
+          const productTitle = firstProduct?.title || "new item"
           await prisma.notifications.create({
             data: {
-              title: "🛒 New Order Received",
+              title: "New order received",
               message: `A customer just ordered ${productTitle} from your shop.`,
               creatorId: userId,
               receiverId: shop.sellerId,
               redirect_link: `https://eshop.com/order/${sessionId}`,
-            },
-          });
+            }
+          })
         }
 
-        // Create notification for admin
         await prisma.notifications.create({
           data: {
-            title: "📦 Platform Order Alert",
+            title: "Platform order alert",
             message: `A new order was placed by ${name}.`,
             creatorId: userId,
             receiverId: "admin",
             redirect_link: `https://eshop.com/order/${sessionId}`,
-          },
-        });
-
-        await redis.del(sessionKey)
+          }
+        })
       }
+
+      await redis.del(sessionKey)
     }
+
     res.status(200).json({ received: true })
   } catch (error) {
     console.log(error)

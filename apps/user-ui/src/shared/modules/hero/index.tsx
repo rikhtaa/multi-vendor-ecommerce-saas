@@ -35,7 +35,7 @@ const Hero = () => {
           <Image
            src={
               layout?.banner ||
-              "https://images.unsplash.com/photo-1767903622395-5677faed2b7f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              "https://ik.imagekit.io/rikhtamenahil/bright-background-modern-yellow-smart-watch-with-blank-black-screen-is-isolated-generative-ai_1219132-53556.avif?updatedAt=1781514684891"
             }
            alt="Banner"
            width={450}

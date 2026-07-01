@@ -6,6 +6,7 @@ tmp
 out-tsc
 
 .env
+apps/auth-service/src/certs/
 
 # dependencies
 node_modules

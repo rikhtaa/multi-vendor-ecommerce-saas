@@ -91,7 +91,7 @@ const CheckoutForm = ({
                 <button
                     type="submit"
                     disabled={!stripe || loading}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 flex items-center justify-center gap-2"
                 >
                     {loading && <Loader2 className="animate-spin w-5 h-5" />}
                     {loading ? "Processing..." : "Pay Now"}

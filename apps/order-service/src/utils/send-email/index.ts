@@ -25,6 +25,7 @@ const renderEmailTemplate = async(templateName:string,data: Record<string, any>)
          "order-service",
          "src",
          "utils",
+         "send-email",
          "email-templates",
         `${templateName}.ejs`
     )

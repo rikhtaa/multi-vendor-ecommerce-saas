@@ -1,25 +1,35 @@
 import { Pencil, WandSparkles, X } from 'lucide-react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const ImagePlaceHolder = ({
-    size,small,onImageChange, pictureUploadingLoader, onRemove,defaultImage = null, index = null, setSelectedImage, setOpenImageModal, images,
-}:{
+    size, small, onImageChange, pictureUploadingLoader, onRemove, defaultImage = null, index = null, setSelectedImage, setOpenImageModal, images,
+}: {
     size: string
-    small?:boolean
-    onImageChange: (file: File | null,index: number) => void
+    small?: boolean
+    onImageChange: (file: File | null, index: number) => void
     pictureUploadingLoader: boolean
-    onRemove?:(index: number) => void
+    onRemove?: (index: number) => void
     defaultImage?: string | null
-    setSelectedImage: (e: string) => void 
+    setSelectedImage: (e: string) => void
     images: any
     setOpenImageModal: (openImageModal: boolean) => void
-    index?: any 
+    index?: any
 }) => {
     const [imagePreview, setImagePreview] = useState<string | null>(defaultImage)
+
+    useEffect(() => {
+        const currentImage = images?.[index]
+        if (currentImage?.file_url) {
+            setImagePreview(currentImage.file_url)
+        } else {
+            setImagePreview(null)
+        }
+    }, [images, index])
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
-        if(file){
+        if (file) {
             setImagePreview(URL.createObjectURL(file))
             onImageChange(file, index)
         }

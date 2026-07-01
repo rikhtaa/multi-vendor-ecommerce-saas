@@ -15,7 +15,7 @@ app.use(
   })
 )
 
-app.post("/api/create-order", bodyParser.raw({type: "application/json"}), (req, res, next) => {
+app.post("/api/webhook", bodyParser.raw({type: "application/json"}), (req, res, next) => {
   (req as any).rawBody = req.body
   next()
 },

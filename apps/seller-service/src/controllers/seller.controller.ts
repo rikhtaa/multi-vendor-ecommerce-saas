@@ -338,13 +338,23 @@ export const getSellerEvents = async (
         const limit = parseInt(req.query.limit as string) || 10
         const skip = (page - 1) * limit
 
-        const [products, total] = await Promise.all([
-            prisma.products.findMany({
+        if (!req.seller?.id) {
+            return next(new AuthError("Only sellers can view their events."))
+        }
+
+        const shop = await prisma.shops.findFirst({
+            where: { sellerId: req.seller.id }
+        })
+
+        if (!shop) {
+            return next(new NotFoundError("Shop not found for this seller."))
+        }
+
+        const [events, total] = await Promise.all([
+            prisma.events.findMany({
                 where: {
-                    starting_date: {
-                        not: null,
-                    },
-                    shopId: req.params.id!,
+                    shopId: shop.id,
+                    isDeleted: false,
                 },
                 skip,
                 take: limit,
@@ -355,17 +365,17 @@ export const getSellerEvents = async (
                     images: true,
                 },
             }),
-            prisma.products.count({
+            prisma.events.count({
                 where: {
-                    starting_date: null,
-                    shopId: req.params.id!,
+                    shopId: shop.id,
+                    isDeleted: false,
                 },
             }),
         ])
 
         res.status(200).json({
             success: true,
-            products,
+            events,
             pagination: {
                 total,
                 page,

@@ -125,14 +125,14 @@ const SidebarBarWrapper = () => {
                   <Mail size={24} color={getIconColor("/dashboard/inbox")}/>
                 }
               />
-               <SidebarItem
+               {/* <SidebarItem
                 isActive={activeSidebar === "/dashboard/settings"}
                 title='Settings'
                 href='/dashboard/settings'
                 icon={
                   <Settings size={22} color={getIconColor("/dashboard/settings")}/>
                 }
-              />
+              /> */}
                <SidebarItem
                 isActive={activeSidebar === "/dashboard/notifications"}
                 title='Notifications'
@@ -154,7 +154,7 @@ const SidebarBarWrapper = () => {
                <SidebarItem
                 isActive={activeSidebar === "/logout"}
                 title='Logout'
-                href='/'
+                href='/logout'
                 icon={
                   <LogOut size={22} color={getIconColor("/logout")}/>
                 }
