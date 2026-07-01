@@ -1,109 +1,304 @@
-# Eshop
+#  EShop  Multi-Vendor E-Commerce SaaS
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A production-ready **multi-vendor e-commerce platform** built with a **Microservice Architecture** inside an **Nx monorepo**. Sellers get their own storefront, buyers get a seamless shopping experience, and admins get full control  all powered by real-time communication, AI-driven recommendations, and ImageKit-based media management.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+---
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-
-## Generate a library
-
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+##  Project Structure
 
 ```
-npx nx release
+.
+ apps/
+�    admin-service/          # Admin REST API (NestJS/Express)
+�    admin-ui/               # Admin dashboard (Next.js)
+�    api-gateway/            # Unified API gateway with rate limiting & proxying
+�    auth-service/           # Authentication & authorization (JWT + cookies)
+�    chatting-service/       # Real-time chat via WebSocket (port 6006)
+�    kafka-service/          # Kafka event consumer/producer bridge
+�    logger-service/         # Centralized logging service
+�    order-service/          # Order lifecycle management
+�    product-service/        # Product catalog, inventory, and search
+�    recommendation-service/ # AI-powered product recommendations (TensorFlow.js)
+�    seller-service/         # Seller onboarding, dashboard, and management
+�    seller-ui/              # Seller-facing frontend (Next.js)
+�    user-ui/                # Buyer-facing storefront (Next.js)
+ packages/                   # Shared libraries
+ prisma/                     # Prisma schema & migrations (MongoDB)
+ generated/                  # Auto-generated Prisma client
+ nx.json
+ package.json
+ tsconfig.base.json
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+---
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+##  Architecture Overview
 
-## Keep TypeScript project references up to date
+EShop follows a **microservice architecture** where each service is independently deployable and communicates via:
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+- **REST** (through the API Gateway for external clients)
+- **Kafka** (async event streaming between services)
+- **WebSocket** (real-time chat between buyers and sellers)
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```
+User / Seller / Admin
+        �
+   [API Gateway :8080]
+        �
+   �
+   �                                   �
+[auth-service]   [product-service]   [order-service]
+[seller-service] [admin-service]     [recommendation-service]
+        �
+   [kafka-service] � [logger-service]
+        �
+   [chatting-service :6006 / :6008]
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+---
 
-```sh
-npx nx sync:check
+##  Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Monorepo tooling | Nx 22, pnpm workspaces |
+| Backend framework | Express.js |
+| Frontend framework | Next.js 16 (React 19) |
+| Database | MongoDB (via Prisma 5) |
+| Caching | Redis (Upstash) |
+| Message broker | Kafka (KafkaJS) |
+| AI / Recommendations | TensorFlow.js |
+| Media management | ImageKit |
+| Authentication | JWT (access + refresh tokens), bcryptjs |
+| Payments | Stripe |
+| Email | Nodemailer (Gmail SMTP) |
+| Real-time chat | WebSocket |
+| API documentation | Swagger (swagger-autogen + swagger-ui-express) |
+| Forms | React Hook Form + Zod |
+| State management | Zustand, Jotai |
+| Styling | Tailwind CSS v3, styled-components |
+| Charts | Recharts, ApexCharts |
+| Node requirement | >= 20 |
+| Package manager | pnpm 9 |
+
+---
+
+##  Getting Started
+
+### Prerequisites
+
+- Node.js >= 20
+- pnpm >= 9
+- A MongoDB Atlas cluster
+- An Upstash Redis database
+- A Kafka cluster (e.g. Confluent Cloud)
+- A Stripe account
+- An ImageKit account
+- A Gmail account (for SMTP)
+
+### Installation
+
+```bash
+git clone <repository-url>
+cd eshop
+pnpm install
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+---
 
-## Set up CI!
+##  Environment Variables
 
-### Step 1
+### Root `.env`
 
-To connect to Nx Cloud, run the following command:
+```env
+# Database
+DATABASE_URL="mongodb+srv://<user>:<password>@<cluster>.mongodb.net/development"
 
-```sh
-npx nx connect
+# Redis (Upstash)
+REDIS_DATABASE_URL="https://<your-upstash-url>"
+REDIS_PASSWORD="<your-upstash-password>"
+
+# SMTP (Gmail)
+SMTP_USER="your@gmail.com"
+SMTP_PASS="<app-password>"
+SMTP_PORT=465
+SMTP_SERVICE=gmail
+SMTP_HOST=smtp.gmail.com
+
+# JWT
+JWT_SECRET="<secret>"
+ACCESS_TOKEN_SECRET="<access-secret>"
+REFRESH_TOKEN_SECRET="<refresh-secret>"
+
+# Stripe
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# ImageKit
+IMAGE_PUBLIC_KEY="public_..."
+IMAGE_SECRET_KEY="private_..."
+
+# Kafka
+KAFKA_API_KEY="<kafka-user>"
+KAFKA_API_SECRET="<kafka-secret>"
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+### `apps/user-ui/.env.local`
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+```env
+NEXT_PUBLIC_SERVER_URI="http://localhost:8080"
+NEXT_PUBLIC_SELLER_SERVER_URI="http://localhost:3001"
+NEXT_PUBLIC_CHATTING_WEBSOCKET_URI="ws://localhost:6006"
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY="pk_test_..."
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### `apps/seller-ui/.env.local`
 
-## Install Nx Console
+```env
+NEXT_PUBLIC_SERVER_URI="http://localhost:8080"
+NEXT_PUBLIC_USER_UI_LINK="http://localhost:3000"
+NEXT_PUBLIC_SOCKET_URI="ws://localhost:6008"
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### `apps/admin-ui/.env.local`
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```env
+NEXT_PUBLIC_SERVER_URI="http://localhost:8080"
+NEXT_PUBLIC_USER_UI_LINK="http://localhost:3000"
+NEXT_PUBLIC_CHATTING_WEBSOCKET_URI="ws://localhost:6006"
+```
 
-## Useful links
+---
 
-Learn more:
+##  Development
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Run Everything at Once
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+pnpm dev:all
+```
+
+### Run Individual Apps
+
+```bash
+# Auth service (default dev target)
+pnpm dev
+
+# User storefront
+pnpm user-ui
+
+# Seller dashboard
+pnpm seller-ui
+
+# Admin dashboard
+pnpm admin-ui
+
+# Chatting service
+pnpm chatting-service
+```
+
+### API Documentation
+
+```bash
+# Generate and serve auth-service Swagger docs
+pnpm auth-docs
+
+# Generate and serve product-service Swagger docs
+pnpm product-docs
+```
+
+---
+
+##  Service Ports
+
+| Service | Port |
+|---|---|
+| API Gateway | 8080 |
+| User UI | 3000 |
+| Seller UI / Seller Service | 3001 |
+| Chatting Service (buyer�seller) | 6006 |
+| Chatting Service (admin) | 6008 |
+
+---
+
+##  Key Features
+
+**User Storefront**
+- Browse products by category, filter by price range
+- AI-powered product recommendations (TensorFlow.js)
+- Real-time chat with sellers
+- Stripe-powered checkout with webhook support
+- Order tracking and history
+
+**Seller Dashboard**
+- Seller onboarding and profile management
+- Product listing with ImageKit media uploads
+- Order management and fulfillment
+- Real-time buyer chat
+- Revenue analytics (Recharts / ApexCharts)
+
+**Admin Dashboard**
+- Platform-wide oversight of users, sellers, and orders
+- Vendor approval and moderation
+- Analytics and reporting
+
+**Infrastructure**
+- API Gateway with rate limiting (`express-rate-limit`) and proxying (`express-http-proxy`)
+- Kafka event bus for decoupled async communication
+- Centralized logging service
+- JWT-based auth with access/refresh token rotation
+- Redis caching for sessions and hot data
+- Prisma ORM with MongoDB Atlas
+
+---
+
+##  Build
+
+```bash
+# Build all apps and packages
+pnpm build
+
+# Build a specific app
+npx nx build auth-service
+npx nx build user-ui
+```
+
+---
+
+##  Linting & Type Checking
+
+```bash
+# Lint all
+npx nx run-many --target=lint --all
+
+# Type check all
+npx nx run-many --target=typecheck --all
+```
+
+---
+
+##  API Docs
+
+Swagger UI is available after running the relevant service:
+
+- Auth Service: `http://localhost:<auth-port>/api-docs`
+- Product Service: `http://localhost:<product-port>/api-docs`
+
+Generate doc files with:
+
+```bash
+pnpm auth-docs
+pnpm product-docs
+```
+
+---
+
+##  Media Management
+
+All product and seller images are managed via **ImageKit**. Configure your ImageKit public and private keys in the root `.env`. The `imagekit` Node.js SDK is used server-side for signed uploads, and the ImageKit CDN handles delivery and transformations.
+
+---
+
+##  License
+
+MIT  see [LICENSE](./LICENSE) for details.
